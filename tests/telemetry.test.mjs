@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {miles,feet,mph,metersFromMiles,metersFromFeet} from '../public/units.js';
+import {normalizeStreams,decodePolyline,seriesPoints,timeBreakdown,summaryFromActivity} from '../public/telemetry.js';
+import {parseCSV} from '../public/rides.js';
+assert.equal(miles(1609.344),1);assert.ok(Math.abs(feet(.3048)-1)<1e-12);assert.ok(Math.abs(mph(.44704)-1)<1e-12);
+assert.equal(metersFromMiles(1),1609.344);assert.ok(Math.abs(metersFromFeet(1)-.3048)<1e-12);
+const imperial=parseCSV('name,date,distance_miles,elevation_ft,duration_minutes\nTest,2026-10-14T12:00:00Z,1,100,60')[0];assert.equal(imperial.distance_m,1609.344);assert.ok(Math.abs(imperial.elevation_m-30.48)<1e-10);
+const data=normalizeStreams({time:{data:[0,1,2,3,4]},watts:{data:[0,100,null,200,300]},heartrate:{data:[0,130,140,150,900]},latlng:{data:[[0,0],[40,-74],[99,0],null,[40.1,-74.1]]}},3);
+assert.deepEqual(data.time,[0,2,4]);assert.deepEqual(data.watts,[0,null,300]);assert.deepEqual(data.heartrate,[null,140,null]);assert.equal(data.latlng[1],null);assert.equal(seriesPoints(data,'watts').length,2);
+assert.deepEqual(normalizeStreams({watts:[100,200]}),{});assert.deepEqual(seriesPoints({time:[0,1],heartrate:[null,120]},'heartrate'),[{x:1,y:120}]);
+assert.deepEqual(decodePolyline('_p~iF~ps|U_ulLnnqC_mqNvxq`@'),[[38.5,-120.2],[40.7,-120.95],[43.252,-126.453]]);assert.deepEqual(decodePolyline('invalid'),[]);
+assert.deepEqual(timeBreakdown({elapsed_s:600,moving_s:400}),{elapsed:600,moving:400,stopped:200});assert.deepEqual(timeBreakdown({elapsed_s:100,moving_s:200}),{elapsed:100,moving:100,stopped:0});assert.equal(timeBreakdown({},600).moving,null);
+const summary=summaryFromActivity({elapsed_time:600,moving_time:500,average_watts:120,device_watts:false,map:{summary_polyline:'abc'}});assert.equal(summary.device_watts,false);assert.equal(summary.average_hr,null);assert.equal(summary.polyline,'abc');
+console.log('Imperial units, CSV conversion, stream alignment, missing data, GPS polylines and moving time checks passed.');
