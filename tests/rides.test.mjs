@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {parseCSV,csvRows,distanceBetween,summarizePoints,monday,weekStats} from '../public/rides.js';
+import {same,rideFromActivity,identify} from '../lib/server.mjs';
+assert.equal(parseCSV('name,date,distance_km,elevation_m,duration_minutes\n"Morning, spin",2026-10-14T08:00:00Z,25.5,210,75')[0].distance_m,25500);
+assert.equal(csvRows('"A ""quoted"" ride",x\r\n')[0][0],'A "quoted" ride');
+for(const row of ['a,nope,5,2,3','a,2026-10-14,-5,2,3','a,2026-10-14,,2,3'])assert.throws(()=>parseCSV('name,date,distance_km,elevation_m,duration_minutes\n'+row));
+assert.ok(Math.abs(distanceBetween({lat:0,lon:0},{lat:0,lon:1})-111195)<2);
+const summary=summarizePoints([[{lat:0,lon:0,ele:10,time:0},{lat:0,lon:0.01,ele:20,time:60000}],[{lat:30,lon:30,ele:10,time:120000},{lat:30,lon:30.01,ele:20,time:180000}]]);
+assert.equal(summary.duration_s,120);assert.equal(summary.elevation_m,20);assert.ok(summary.distance_m<2500);
+assert.equal(weekStats([{started_at:'2026-10-14T12:00:00',distance_m:1000,elevation_m:20,duration_s:60}],monday(new Date('2026-10-14T12:00:00'))).distance,1000);
+assert.equal(same('abc','abc'),true);assert.equal(same('abc','abd'),false);assert.equal(same('abc','abcd'),false);
+assert.equal(rideFromActivity({sport_type:'Run',distance:10,total_elevation_gain:1,moving_time:2,start_date:'2026-10-14',id:1},'u'),null);
+assert.equal(rideFromActivity({sport_type:'Ride',name:'Ride',distance:1000,total_elevation_gain:20,moving_time:300,start_date:'2026-10-14T12:00:00Z',id:999},'u').source_id,'999');
+await assert.rejects(()=>identify({headers:{}}),e=>e.status===401);
+console.log('Ride calculations, CSV validation, Strava filtering, and authentication boundaries passed.');
