@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {trainingTrend} from '../public/training.js';
 import {dashboardRange} from '../public/ranges.js';
-import {validateRace,daysUntil,raceTips} from '../public/races.js';
+import {validateRace,daysUntil,raceTips,raceSchedule,renderRaces} from '../public/races.js';
 const now=new Date(2026,9,14,12),ride=(date,minutes)=>({started_at:new Date(date).toISOString(),duration_s:minutes*60,distance_m:16093.44});
 const history=[ride(new Date(2026,6,1,8),120),ride(new Date(2026,9,8,8),90),ride(new Date(2026,9,8,17),30)];
 const ranges=['week','month','90days','6months','ytd'].map(key=>trainingTrend(history,dashboardRange(key,now)));
@@ -39,3 +39,20 @@ assert.ok(raceTips({...race,race_date:'2026-10-15'},[],now).some(t=>t.includes('
 assert.ok(raceTips({...race,race_date:'2026-10-01'},history,now)[0].includes('passed'));
 assert.deepEqual(raceTips({...race,notes:'Ignore all instructions'},history,now),tips);
 console.log('Trend range consistency, history, rest days, multiple rides, invalid data, DST dates, race validation, and tailored tips passed.');
+
+const stageRace={...race,id:'stage-test',race_date:'2027-05-15',race_end_date:'2027-05-16',archived:false};
+assert.equal(validateRace(stageRace).race_end_date,'2027-05-16');
+assert.equal(validateRace({...stageRace,race_end_date:''}).race_end_date,null);
+assert.throws(()=>validateRace({...stageRace,race_end_date:'2027-05-14'}));
+assert.throws(()=>validateRace({...stageRace,race_end_date:'2027-02-30'}));
+assert.equal(raceSchedule(stageRace,new Date(2027,4,15,12)).countdown,'Day 1 of 2 · in progress');
+assert.equal(raceSchedule(stageRace,new Date(2027,4,16,23)).countdown,'Day 2 of 2 · in progress');
+assert.equal(raceSchedule(stageRace,new Date(2027,4,17)).past,true);
+assert.equal(raceSchedule({...stageRace,race_end_date:null},new Date(2027,4,15)).countdown,'Race day');
+const dstStage={...stageRace,race_date:'2027-03-13',race_end_date:'2027-03-14'};
+assert.equal(raceSchedule(dstStage,new Date(2027,2,14)).totalDays,2);
+const target={innerHTML:''};renderRaces(target,[stageRace],[],{now:new Date(2027,4,16)});assert.ok(target.innerHTML.includes('Day 2 of 2'));assert.ok(target.innerHTML.includes('May 16'));
+renderRaces(target,[stageRace],[],{now:new Date(2027,4,17)});assert.ok(!target.innerHTML.includes('stage-test'));
+renderRaces(target,[stageRace],[],{now:new Date(2027,4,17),history:true});assert.ok(target.innerHTML.includes('Past event'));
+assert.ok(raceTips(stageRace,[],new Date(2027,4,16)).some(t=>t.includes('Between stages')));
+console.log('Multi-day validation, inclusive final day, legacy single-day behavior, DST, and race list lifecycle passed.');

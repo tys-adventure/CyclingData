@@ -1,0 +1,1 @@
+alter table public.races add column race_end_date date; alter table public.races add constraint races_end_date_check check(race_end_date is null or (race_end_date >= race_date and race_end_date <= date '2100-12-31'));
