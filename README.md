@@ -1,4 +1,4 @@
-# CyclingData
+# RideVector
 
 A private cycling dashboard deployed to https://cyclingdata.vercel.app through the existing Vercel project. Supabase provides email/password authentication and user-owned ride records.
 
