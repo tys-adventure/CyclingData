@@ -5,11 +5,11 @@ A private cycling dashboard deployed to https://cyclingdata.vercel.app through t
 ## Features
 
 - Responsive dashboard with a clearly labeled demo before sign-in, weekly distance, elevation gain, riding time, and ride count.
-- Eight-week distance chart, editable weekly goal, searchable journal, ride detail, and deletion.
+- Five dashboard ranges: Last week (trailing 7 days), Last month (trailing 30 days), Last 90 days, Last 6 months (calendar months), and Year to Date (January 1 through today), using the browser’s local timezone. Totals, adaptive daily/weekly/monthly charts, and recent rides follow the selected range. The weekly goal always uses the current Monday–Sunday week. Full paginated ride loading prevents totals from being limited to the first 500 records.
 - GPX and TCX imports, CSV batch import (template provided), and manual ride entry. Files are limited to 10 MB; CSV files to 1,000 rides. Summaries are stored; original files and coordinates stay in the browser. GPX duration is elapsed track time; TCX uses lap time. Elevation uses a 3-meter noise threshold, so results can differ from device software.
 - SHA-256 file identity prevents repeated uploads of identical files.
 - Supabase sign-up, email confirmation, sign-in, sign-out, and password reset.
-- Strava authorization with expiring single-use state bound to an HttpOnly browser cookie, server-only tokens, refresh, import of the last 90 days (up to 500 activities), activity webhooks, and disconnect with data removal. Imports are throttled to once per minute.
+- Strava authorization with expiring single-use state bound to an HttpOnly browser cookie, server-only tokens, refresh, import covering Year to Date and the last six months (up to 500 activities per import), activity webhooks, and disconnect with data removal. Imports are throttled to once per minute.
 
 ## Browser configuration
 
@@ -29,4 +29,4 @@ Push changes to `main`; the existing GitHub-connected Vercel project deploys the
 
 ## Validation
 
-Run `node tests/rides.test.mjs` for metric, CSV, and input checks. Browser QA checks the real dashboard and GPX/TCX parsing. Database isolation checks ran inside a rollback transaction, including cross-user insert rejection, anonymous restrictions, and lack of client access to Strava tokens. Strava imports need real app credentials and athlete authorization to test end to end.
+Run the ride and range tests in `tests/` for metrics, CSV, range boundaries, chart totals, leap years, and year rollover. Browser QA checks the real dashboard and GPX/TCX parsing. Database isolation checks ran inside a rollback transaction, including cross-user insert rejection, anonymous restrictions, and lack of client access to Strava tokens. Strava imports need real app credentials and athlete authorization to test end to end.
