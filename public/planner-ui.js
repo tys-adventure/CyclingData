@@ -6,7 +6,7 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&
 const fmt=(value,d=0)=>Number(value).toLocaleString(undefined,{maximumFractionDigits:d});
 const label=value=>new Date(value).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
 const duration=value=>`${fmt(value/3600,1)} hrs`;
-export function createPlanner({getClient,getUser,getRides,getRaces,needUser,notify,openTraining,openRaces}){
+export function createPlanner({getClient,getUser,getRides,getRaces,needUser,notify,openTraining,openRaces,onChange=()=>{}}){
  let sessions=[],selected=dateKey(new Date()),month=calendarDate(selected),week=monday(new Date()),editing=null,includeArchived=false,error='';
  const clearError=()=>{$('#planner-error').textContent=error;};
  function renderRecap(target){
@@ -33,7 +33,7 @@ export function createPlanner({getClient,getUser,getRides,getRaces,needUser,noti
   ].join('')||'<div class="empty-state"><h3>A little space in your calendar.</h3><p>Plan a ride or rest day here. Recorded rides and saved races appear automatically.</p></div>';
   $('#calendar-show-archived').checked=includeArchived;clearError();
  }
- function render(){renderCalendar();for(const id of ['#dashboard-recap','#training-recap'])renderRecap($(id));for(const id of ['#dashboard-records','#training-records'])renderRecords($(id));}
+ function render(){renderCalendar();for(const id of ['#dashboard-recap','#training-recap'])renderRecap($(id));for(const id of ['#dashboard-records','#training-records'])renderRecords($(id));onChange();}
  function reset(){sessions=[];selected=dateKey(new Date());month=calendarDate(selected);week=monday(new Date());editing=null;error='';includeArchived=false;$('#session-dialog').close();render();}
  async function load(){const user=getUser();if(!user){reset();return;}const owner=user.id;try{let rows=[];for(let offset=0;;offset+=500){const result=await getClient().from('training_sessions').select('*').order('session_date').order('id').range(offset,offset+499);if(result.error)throw result.error;if(getUser()?.id!==owner)return;rows.push(...result.data);if(result.data.length<500)break;}sessions=rows;error='';render();}catch(e){if(getUser()?.id===owner){error='Could not load training plans: '+e.message;clearError();}}}
  function restFields(){const rest=$('#session-form [name=session_type]').value==='rest';for(const name of ['duration','distance']){const input=$('#session-form [name='+name+']');input.disabled=rest;if(rest)input.value='';}}
@@ -60,5 +60,5 @@ export function createPlanner({getClient,getUser,getRides,getRaces,needUser,noti
  });
  $('#archive-session').onclick=e=>{if(editing)patch(editing,{archived:true},e.target);};
  $('#session-form').onsubmit=async e=>{e.preventDefault();if(!getUser())return;const owner=getUser().id,id=editing,button=$('#save-session');button.disabled=true;try{const f=new FormData(e.target),minutes=f.get('duration'),distance=f.get('distance');const values=validateSession({title:f.get('title'),session_date:f.get('session_date'),session_type:f.get('session_type'),status:f.get('status'),notes:f.get('notes'),duration_min:minutes==null||minutes===''?null:Number(minutes),distance_m:distance==null||distance===''?null:metersFromMiles(distance)});const result=id?await getClient().from('training_sessions').update(values).eq('id',id).eq('user_id',owner).select('id').single():await getClient().from('training_sessions').insert({...values,user_id:owner}).select('id').single();if(result.error)throw result.error;if(getUser()?.id!==owner)return;selected=values.session_date;month=calendarDate(selected);$('#session-dialog').close();await load();notify('Training plan saved. Recorded ride totals stay separate.');}catch(e){if(getUser()?.id===owner)$('#session-message').textContent=e.message;}finally{button.disabled=false;}};
- return {render,load,reset};
+ return {render,load,reset,getSessions:()=>sessions};
 }
