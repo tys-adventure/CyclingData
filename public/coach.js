@@ -30,9 +30,11 @@ export function coachBaseline(profile,rides,now=new Date()){
  return {miles:profile.baseline_miles==null?miles(totals.distance)/4:Number(profile.baseline_miles),source:profile.baseline_miles==null?'history':'your baseline',lastWeekMiles:miles(last.distance),recordedRides:recent.length,activeWeeks:new Set(recent.map(r=>dateKey(monday(new Date(r.started_at))))).size,longestMinutes:Math.max(0,...recent.map(r=>(Number(r.duration_s)||0)/60))};
 }
 function distribute(total,days,longDay,cap){
- const result=new Map(days.map(d=>[d,0])),ordered=[...days].sort((a,b)=>(b===longDay)-(a===longDay)||a-b);
+ const result=new Map(days.map(d=>[d,0])),ordered=[...days].sort((a,b)=>(b===longDay)-(a===longDay)||a-b).slice(0,Math.floor(total/15));
+ // Start fewer days when needed so every riding suggestion is at least 15 minutes.
  // Allocate a fixed full-week budget first. Missed days are never redistributed.
- let left=Math.floor(total/5)*5;
+ for(const day of ordered)result.set(day,15);
+ let left=Math.floor(total/5)*5-ordered.length*15;
  while(left>=5){let progress=false;for(const day of ordered){const weight=day===longDay?2:1;for(let i=0;i<weight&&left>=5;i++){if(result.get(day)+5<=cap){result.set(day,result.get(day)+5);left-=5;progress=true;}}}if(!progress)break;}
  for(const [day,value]of result)if(value<15)result.set(day,0);
  return result;

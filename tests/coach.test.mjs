@@ -30,3 +30,5 @@ const keys=draft.suggestions.map(d=>d.coach_key);assert.equal(new Set(keys).size
 console.log('Coach baseline/budget caps, no catch-up, time and mileage completion, tired/edited targets, preserved plans, stage race days, taper/recovery, validation and duplicate keys passed.');
 
 assert.equal(make({sessions:[{session_date:'2026-10-15',status:'planned',duration_min:600}]}).reviewCalendar,true);
+
+assert.equal(make({checkin:{recovery:'normal',override_distance_m:metersFromMiles(12)}}).targetMiles,12);
