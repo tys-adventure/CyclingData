@@ -1,2 +1,34 @@
 import {method,db,hash,same,stateCookie,cookie,tokenRequest,origin} from '../../lib/server.mjs';
-export default async(req,res)=>{res.setHeader('Cache-Control','no-store');try{method(req,['GET']);const {state,code,scope,error}=req.query;if(typeof state!=='string'||state.length!==64||!same(hash(state),stateCookie(req)))throw Error('Invalid authorization state');res.setHeader('Set-Cookie',cookie('',0));const rows=await db('strava_oauth_states?state_hash=eq.'+hash(state)+'&expires_at=gt.'+encodeURIComponent(new Date().toISOString()),{method:'DELETE'});const entry=rows?.[0];if(!entry)throw Error('Expired authorization state');if(error){res.redirect(303,origin+'/?strava=denied');return;}if(typeof code!=='string'||typeof scope!=='string'||!scope.split(',').includes('activity:read_all'))throw Error('Activity permission required');const token=await tokenRequest({grant_type:'authorization_code',code});if(!token.athlete?.id||!token.access_token||!token.refresh_token)throw Error('Invalid token response');await db('strava_connections?on_conflict=user_id',{method:'POST',body:{user_id:entry.user_id,athlete_id:token.athlete.id,access_token:token.access_token,refresh_token:token.refresh_token,expires_at:token.expires_at,scope},prefer:'resolution=merge-duplicates,return=representation'});res.redirect(303,origin+'/?strava=connected');}catch(e){console.error('Strava callback failed',e.name);res.redirect(303,origin+'/?strava=error');}};
+export function createCallback(deps={method,db,hash,same,stateCookie,cookie,tokenRequest,origin,log:reason=>console.error('Strava callback failed',reason)}) {
+ return async(req,res)=>{
+  res.setHeader('Cache-Control','no-store');let stage='callback';
+  const fail=reason=>{throw Object.assign(new Error('Strava callback failed'),{callbackReason:reason});};
+  try {
+   deps.method(req,['GET']);
+   const {state,code,scope,error}=req.query;
+   if(typeof state!=='string'||!/^[a-f0-9]{64}$/.test(state))fail('invalid_state');
+   const savedCookie=deps.stateCookie(req);
+   if(!savedCookie)fail('browser_session');
+   if(!deps.same(deps.hash(state),savedCookie))fail('state_mismatch');
+   res.setHeader('Set-Cookie',deps.cookie('',0));
+   stage='state_store';
+   const rows=await deps.db('strava_oauth_states?state_hash=eq.'+deps.hash(state)+'&expires_at=gt.'+encodeURIComponent(new Date().toISOString()),{method:'DELETE'});
+   const entry=rows?.[0];if(!entry)fail('expired');
+   if(error){res.redirect(303,deps.origin+'/?strava=denied');return;}
+   if(typeof code!=='string'||!code)fail('missing_code');
+   const granted=typeof scope==='string'?scope.split(/[,\s]+/):[];
+   if(!granted.includes('activity:read_all'))fail('activity_permission');
+   stage='token_exchange';
+   const token=await deps.tokenRequest({grant_type:'authorization_code',code});
+   if(!token.athlete?.id||!token.access_token||!token.refresh_token)fail('token_response');
+   stage='connection_save';
+   await deps.db('strava_connections?on_conflict=user_id',{method:'POST',body:{user_id:entry.user_id,athlete_id:token.athlete.id,access_token:token.access_token,refresh_token:token.refresh_token,expires_at:token.expires_at,scope},prefer:'resolution=merge-duplicates,return=representation'});
+   res.redirect(303,deps.origin+'/?strava=connected');
+  }catch(e){
+   const reason=e.callbackReason||stage;
+   deps.log(reason);
+   res.redirect(303,deps.origin+'/?strava='+encodeURIComponent(reason));
+  }
+ };
+}
+export default createCallback();

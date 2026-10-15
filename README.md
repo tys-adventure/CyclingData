@@ -50,3 +50,5 @@ Race dates support an optional inclusive end date. Blank end dates preserve sing
 The My Races sidebar tab shares the dashboard race data, forms, archive/restore controls, and preparation tips. Both views refresh after edits.
 
 The canonical public domain is https://ridevector.app. Browser visits to cyclingdata.vercel.app preserve path/query/fragment and redirect to the custom domain. The existing Strava webhook subscription stays at https://cyclingdata.vercel.app/api/strava/webhook to avoid interrupting activity notifications; API routes remain accessible at that host. OAuth callbacks and post-connection redirects use the custom domain. Supabase Site URL and redirect allowlist include the custom domain.
+
+Strava callback failures return fixed, non-sensitive reason codes with actionable browser-session, expired-link, permission, and server-save messages. Logs record only the stage/reason, never OAuth codes, state values, credentials, or tokens. OAuth state/cookie validation stays required; scope parsing accepts comma- or whitespace-separated scopes.
