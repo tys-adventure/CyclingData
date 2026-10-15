@@ -1,6 +1,6 @@
 # RideVector
 
-A private cycling dashboard deployed to https://cyclingdata.vercel.app through the existing Vercel project. Supabase provides email/password authentication and user-owned ride records.
+A private cycling dashboard deployed to https://ridevector.app through the existing Vercel project. Supabase provides email/password authentication and user-owned ride records.
 
 ## Features
 
@@ -15,9 +15,9 @@ A private cycling dashboard deployed to https://cyclingdata.vercel.app through t
 
 In Vercel → cyclingdata → Environment Variables, add `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` from the Strava API application. Select Production and keep them secret. The Supabase integration supplies `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SECRET_KEY` (legacy service-role key is a fallback). Secrets must never use a public prefix.
 
-In Strava API settings, use Website `https://cyclingdata.vercel.app` and Authorization Callback Domain `cyclingdata.vercel.app`. The callback is `/api/strava/callback`. A dedicated Strava application is required: the first connection automatically registers `/api/strava/webhook`. Strava controls the application's athlete capacity and API limits.
+In Strava API settings, use Website `https://ridevector.app` and Authorization Callback Domain `ridevector.app`. The callback is `/api/strava/callback`. A dedicated Strava application is required: the first connection automatically registers `/api/strava/webhook`. Strava controls the application's athlete capacity and API limits.
 
-Supabase's Site URL is `https://cyclingdata.vercel.app`; the redirect allowlist contains `https://cyclingdata.vercel.app/`. Email confirmation remains enabled. Supabase's default mail service can restrict delivery and rate-limit email; configure custom SMTP before a broad public launch.
+Supabase's Site URL is `https://ridevector.app`; the redirect allowlist contains `https://ridevector.app/`. Email confirmation remains enabled. Supabase's default mail service can restrict delivery and rate-limit email; configure custom SMTP before a broad public launch.
 
 ## Database
 
@@ -48,3 +48,5 @@ Upcoming races are saved in Supabase races with ownership RLS and no anonymous a
 Race dates support an optional inclusive end date. Blank end dates preserve single-day events; date ordering is validated in both the client and database. Multi-day events remain on Upcoming races through the final day, with a Day N of M status while underway. Displayed distance and elevation are event totals; preparation tips explain stage planning and label average daily distance as an estimate. Fitness/Fatigue explanations are visible above the graph.
 
 The My Races sidebar tab shares the dashboard race data, forms, archive/restore controls, and preparation tips. Both views refresh after edits.
+
+The canonical public domain is https://ridevector.app. Browser visits to cyclingdata.vercel.app preserve path/query/fragment and redirect to the custom domain. The existing Strava webhook subscription stays at https://cyclingdata.vercel.app/api/strava/webhook to avoid interrupting activity notifications; API routes remain accessible at that host. OAuth callbacks and post-connection redirects use the custom domain. Supabase Site URL and redirect allowlist include the custom domain.
