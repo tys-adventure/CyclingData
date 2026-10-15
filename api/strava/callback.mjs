@@ -1,3 +1,4 @@
+import {activityAccess} from '../../lib/strava-scopes.mjs';
 import {method,db,hash,same,stateCookie,cookie,tokenRequest,origin} from '../../lib/server.mjs';
 export function createCallback(deps={method,db,hash,same,stateCookie,cookie,tokenRequest,origin,log:reason=>console.error('Strava callback failed',reason)}) {
  return async(req,res)=>{
@@ -16,14 +17,16 @@ export function createCallback(deps={method,db,hash,same,stateCookie,cookie,toke
    const entry=rows?.[0];if(!entry)fail('expired');
    if(error){res.redirect(303,deps.origin+'/?strava=denied');return;}
    if(typeof code!=='string'||!code)fail('missing_code');
-   const granted=typeof scope==='string'?scope.split(/[,\s]+/):[];
-   if(!granted.includes('activity:read_all'))fail('activity_permission');
+   if(activityAccess(scope)==='none')fail('activity_permission');
    stage='token_exchange';
    const token=await deps.tokenRequest({grant_type:'authorization_code',code});
    if(!token.athlete?.id||!token.access_token||!token.refresh_token)fail('token_response');
+   const effectiveScope=typeof token.scope==='string'?token.scope:scope;
+   const access=activityAccess(effectiveScope);
+   if(access==='none')fail('activity_permission');
    stage='connection_save';
-   await deps.db('strava_connections?on_conflict=user_id',{method:'POST',body:{user_id:entry.user_id,athlete_id:token.athlete.id,access_token:token.access_token,refresh_token:token.refresh_token,expires_at:token.expires_at,scope},prefer:'resolution=merge-duplicates,return=representation'});
-   res.redirect(303,deps.origin+'/?strava=connected');
+   await deps.db('strava_connections?on_conflict=user_id',{method:'POST',body:{user_id:entry.user_id,athlete_id:token.athlete.id,access_token:token.access_token,refresh_token:token.refresh_token,expires_at:token.expires_at,scope:effectiveScope},prefer:'resolution=merge-duplicates,return=representation'});
+   res.redirect(303,deps.origin+'/?strava='+(access==='limited'?'connected_limited':'connected'));
   }catch(e){
    const reason=e.callbackReason||stage;
    deps.log(reason);
