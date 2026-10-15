@@ -3,7 +3,7 @@ const $=s=>document.querySelector(s);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const duration=s=>s<60?Math.round(s)+' sec':(s/60).toLocaleString(undefined,{maximumFractionDigits:1})+' min';
 function zoneRows(defs,seconds=null,covered=0){
- return '<div class="zone-rows">'+defs.map((z,i)=>'<div class="zone-row"><div><strong>Z'+(i+1)+' · '+esc(z.name)+'</strong><span>'+z.lower+(z.upper===null?'+':'–'+z.upper)+' '+z.unit+'</span></div>'+(seconds?'<div class="zone-track"><i class="zone-color-'+i+'" style="width:'+(covered?seconds[i]/covered*100:0)+'%"></i></div><small>'+duration(seconds[i])+' · '+(covered?(seconds[i]/covered*100).toFixed(1):0)+'%</small>':'')+'</div>').join('')+'</div>';
+ return '<div class="zone-rows">'+defs.map((z,i)=>'<div class="zone-row"><div><strong>Z'+(i+1)+' · '+esc(z.name)+'</strong><span>'+z.lower+(z.upper===null?'+':'–'+z.upper)+' '+z.unit+'</span></div>'+(seconds?'<div class="zone-track"><i class="zone-color-'+i+'" data-zone-width="'+(covered?seconds[i]/covered*100:0)+'"></i></div><small>'+duration(seconds[i])+' · '+(covered?(seconds[i]/covered*100).toFixed(1):0)+'%</small>':'')+'</div>').join('')+'</div>';
 }
 export function renderRideZones(settings,payload={}){
  const content=['power','hr'].map(kind=>{
