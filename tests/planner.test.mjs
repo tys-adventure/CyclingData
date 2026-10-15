@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {dateKey,calendarDate,weeklyRecap,personalRecords,dayEvents,monthCells,validateSession,validCalendarDate} from '../public/planner.js';
+const ride=(id,date,distance=1000,elevation=10,duration=600)=>({id,name:id,started_at:new Date(...date).toISOString(),distance_m:distance,elevation_m:elevation,duration_s:duration});
+const rides=[ride('prev-mon',[2026,9,5,9],5000),ride('prev-wed',[2026,9,7,9],6000),ride('prev-thu',[2026,9,8,9],99999),ride('mon',[2026,9,12,9],10000,200,3600),ride('wed',[2026,9,14,9],20000,300,7200),ride('future',[2026,10,1,9],9999999)];
+const sessions=[{id:'a',session_date:'2026-10-12',session_type:'easy',status:'completed'},{id:'b',session_date:'2026-10-14',session_type:'rest',status:'completed'},{id:'c',session_date:'2026-10-14',session_type:'endurance',status:'planned'},{id:'d',session_date:'2026-10-15',session_type:'easy',status:'planned'},{id:'e',session_date:'2026-10-14',session_type:'easy',status:'completed',archived:true}];
+const now=new Date(2026,9,14,12),recap=weeklyRecap(rides,sessions,new Date(2026,9,14),now);
+assert.equal(recap.current.distance,30000);assert.equal(recap.current.count,2);assert.equal(recap.current.days.size,2);assert.equal(recap.previous.distance,11000);assert.equal(recap.partial,true);assert.equal(recap.planned,2);assert.equal(recap.completed,1);
+const historical=weeklyRecap(rides,[],new Date(2026,9,5),now);assert.equal(historical.partial,false);assert.equal(historical.current.distance,110999);
+const records=personalRecords(rides,now);assert.equal(records.distance.id,'prev-thu');assert.equal(records.elevation.id,'wed');assert.equal(records.duration.id,'wed');assert.equal(records.week.date,'2026-10-05');assert.equal(records.week.distance,110999);
+assert.deepEqual(personalRecords([],now),{distance:null,elevation:null,duration:null,week:null});
+const tie=personalRecords([ride('later',[2026,9,14],10000),ride('earlier',[2026,9,12],10000)],now);assert.equal(tie.distance.id,'earlier');
+const races=[{id:'race',race_date:'2027-05-15',race_end_date:'2027-05-16'},{id:'archived-race',race_date:'2027-05-15',race_end_date:'2027-05-16',archived:true}];
+assert.equal(dayEvents('2027-05-16',[],races,[]).races.length,1);assert.equal(dayEvents('2027-05-17',[],races,[]).races.length,0);
+const session={id:'one',title:'Easy',session_date:'2026-10-14',session_type:'easy',status:'planned',duration_min:60,distance_m:10000};
+assert.equal(validateSession(session).duration_min,60);assert.equal(validateSession({...session,session_type:'rest'}).distance_m,null);
+assert.throws(()=>validateSession({...session,session_date:'2026-02-30'}));assert.throws(()=>validateSession({...session,duration_min:2.5}));assert.throws(()=>validateSession({...session,title:' '}));assert.throws(()=>validateSession({...session,status:'invalid'}));assert.equal(validCalendarDate('2024-02-29'),true);assert.equal(validCalendarDate('2026-02-29'),false);
+assert.equal(dayEvents('2026-10-14',rides,[],[{...session,archived:true}]).sessions.length,0);assert.equal(dayEvents('2026-10-14',rides,[],[{...session,archived:true}],true).sessions.length,1);
+for(const month of [new Date(2026,2,1),new Date(2026,10,1),new Date(2027,4,1),new Date(2028,1,1)]){const cells=monthCells(month);assert.equal(cells.length%7,0);assert.equal(cells[0].getDay(),1);const keys=cells.map(dateKey);assert.equal(new Set(keys).size,keys.length);assert.ok(keys.includes(dateKey(month)));assert.ok(keys.includes(dateKey(new Date(month.getFullYear(),month.getMonth()+1,0))));}
+assert.equal(dateKey(calendarDate('2027-05-16')),'2027-05-16');
+const yearRides=[ride('sun',[2027,0,3,10],10000),ride('mon',[2027,0,4,10],20000)];assert.equal(personalRecords(yearRides,new Date(2027,0,5)).week.date,'2027-01-04');
+console.log('Matched weekday recaps, actual/plan separation, PR history and ties, future exclusion, stage days, archive handling, date validation, month grids, leap years and year rollover passed.');
