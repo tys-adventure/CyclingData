@@ -11,7 +11,7 @@ const full=make({now:monday});assert.equal(full.targetMiles,draft.targetMiles);
 for(const day of draft.days){const original=full.days.find(d=>d.date===day.date);assert.ok((day.duration_min||0)<=(original.duration_min||0));}
 assert.equal(draft.days.find(d=>d.date==='2026-10-13').kind,'past');
 const doneRide={id:'ridden',started_at:new Date(2026,9,14,8).toISOString(),distance_m:metersFromMiles(70),duration_s:3600};
-const met=make({rides:[doneRide]});assert.ok(met.suggestions.every(d=>d.session_type==='rest'));assert.equal(met.days.find(d=>d.date==='2026-10-14').kind,'recorded');
+const met=make({rides:[doneRide]});assert.ok(met.suggestions.some(d=>d.kind==='suggestion'));assert.equal(met.days.find(d=>d.date==='2026-10-14').kind,'recorded');
 const timeMet=make({rides:[{...doneRide,distance_m:1000,duration_s:360*60}]});assert.ok(timeMet.suggestions.every(d=>d.session_type==='rest'));
 const tired=make({checkin:{recovery:'tired'}});assert.ok(tired.targetMinutes<draft.targetMinutes);assert.ok(tired.suggestions.every(d=>d.session_type==='easy'||d.session_type==='rest'));
 const rest=make({checkin:{recovery:'tired',override_distance_m:0}});assert.equal(rest.targetMinutes,0);
@@ -27,8 +27,9 @@ const returner=make({profile:{...profile,experience:'returning'}});assert.ok(ret
 assert.throws(()=>validateCoachProfile({...profile,available_days:[0,1,2,3,4,5,6]}));assert.throws(()=>validateCoachProfile({...profile,available_days:[1,1]}));assert.throws(()=>validateCoachProfile({...profile,long_day:0}));assert.throws(()=>validateCoachProfile({...profile,long_minutes:480}));
 assert.throws(()=>validateCheckin({week_start:'2026-10-13',recovery:'normal'},profile));assert.throws(()=>validateCheckin({week_start:'2026-10-12',recovery:'normal',override_distance_m:metersFromMiles(100)},profile));assert.equal(validateCheckin({week_start:'2026-10-12',recovery:'normal',override_distance_m:0},profile).override_distance_m,0);
 const keys=draft.suggestions.map(d=>d.coach_key);assert.equal(new Set(keys).size,keys.length);assert.ok(draft.suggestions.every(d=>d.date>='2026-10-14'));
-console.log('Coach baseline/budget caps, no catch-up, time and mileage completion, tired/edited targets, preserved plans, stage race days, taper/recovery, validation and duplicate keys passed.');
+console.log('Coach baseline/budget caps, no catch-up, time completion and distance-independent planning, tired/edited targets, preserved plans, stage race days, taper/recovery, validation and duplicate keys passed.');
 
 assert.equal(make({sessions:[{session_date:'2026-10-15',status:'planned',duration_min:600}]}).reviewCalendar,true);
 
 assert.equal(make({checkin:{recovery:'normal',override_distance_m:metersFromMiles(12)}}).targetMiles,12);
+
