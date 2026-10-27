@@ -16,6 +16,7 @@ const stream=watts=>({summary:{device_watts:true},streams:{time:Array.from({leng
 const easy=make({rides:[...history,ride],zones,recordings:{new:stream(120)}});
 const hard=make({rides:[...history,ride],zones,recordings:{new:stream(240)}});
 assert.ok(hard.targetMinutes<easy.targetMinutes);
+assert.equal(make({rides:[...history,ride],zones,recordings:{new:stream(240)},week:new Date(2026,9,19)}).targetMinutes,make({rides:[...history,ride],zones,recordings:{new:stream(120)},week:new Date(2026,9,19)}).targetMinutes);
 assert.equal(hard.evidence.highMinutes,60);assert.equal(hard.evidence.powerRides,1);assert.equal(hard.evidence.hardWithin48h,true);
 assert.equal(hard.actual.elevation,700);
 assert.ok(hard.days.filter(d=>d.kind==='suggestion'&&d.date<='2026-10-15').every(d=>d.session_type==='easy'));
