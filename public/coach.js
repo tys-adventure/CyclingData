@@ -1,3 +1,4 @@
+import {trainingAdjustment,missedAllocationMinutes,canonicalCoachKey} from './coach-adjustments.js';
 import {coachEvidence,coachTime} from './coach-load.js';
 import {monday} from './rides.js';
 import {dateKey,calendarDate,addDays,validCalendarDate} from './planner.js';
@@ -58,9 +59,13 @@ export function buildCoachWeek({profile,races,rides,sessions=[],checkin=null,rec
  const reasons=[],growth={beginner:0,returning:0,intermediate:.03,experienced:.05}[profile.experience];
  const ahead=Math.max(0,Math.min(4,Math.round((dayNumber(start)-dayNumber(currentWeek))/7)));
  let base=baseline.minutes;
+ const adjustment=trainingAdjustment({profile,baseline,rides,sessions,checkin,now});
  const growthAllowed=baseline.activeWeeks>=3;
  if(baseline.source==='history'&&baseline.lastWeekMinutes<base*.7){base=Math.min(base,baseline.lastWeekMinutes>0?baseline.lastWeekMinutes:base*.5);reasons.push('Recent recorded volume dropped, so this draft starts lower instead of making up missed riding time.');}
- let targetMinutes=base*(1+(growthAllowed?growth:0))**ahead;
+ const increaseAllowed=phase==='Base'||phase==='Build';
+ const trendFactor=adjustment.factor>1&&(!increaseAllowed||evidence.volumeFactor<1)?1:adjustment.factor;
+ let targetMinutes=base*Math.max(trendFactor>1?trendFactor:1,(1+(growthAllowed?growth:0))**ahead)*Math.min(1,trendFactor);
+ reasons.push(adjustment.factor>1&&trendFactor===1?'More frequent riding was recorded, but recovery or race phase prevents automatic growth.':adjustment.reason);
  if(!growthAllowed)reasons.push("Automatic preview growth is paused until at least three of the previous four weeks contain recorded rides.");
  if(ahead===0&&evidence.volumeFactor<1){targetMinutes*=evidence.volumeFactor;reasons.push(evidence.hardWithin48h?"A recorded ride included at least 20 minutes in your configured zones 4+ within the last 48 hours. The draft is reduced 15% and near-term suggestions stay easy.":"Recorded time in the last seven days exceeds the four-week baseline by over 30%. This draft is reduced 15%.");}
  if(profile.experience==='returning'&&cycle<2){targetMinutes*=.75;reasons.push('Returning-rider setup starts with a reduced draft for the first two coach weeks.');}
@@ -74,7 +79,10 @@ export function buildCoachWeek({profile,races,rides,sessions=[],checkin=null,rec
  let cap=Math.min(profile.long_minutes,profile.weekly_minutes);
  if(baseline.source==='history'&&baseline.longestMinutes>0)cap=Math.min(cap,Math.max(15,Math.floor(baseline.longestMinutes*1.1/5)*5));
  targetMinutes=Math.max(0,Math.min(targetMinutes,profile.weekly_minutes,available.length*cap));
- const allocation=distribute(targetMinutes,available,profile.long_day,cap),plannedMinutes=[...allocation.values()].reduce((a,b)=>a+b,0),targetMiles=plannedMinutes/60*profile.planning_mph;
+ const allocation=distribute(targetMinutes,available,profile.long_day,cap),nominalMinutes=[...allocation.values()].reduce((a,b)=>a+b,0);
+ const missedMinutes=checkin?.override_distance_m!=null?0:missedAllocationMinutes({allocation,start,rides,sessions,now});
+ const plannedMinutes=Math.max(0,nominalMinutes-missedMinutes),targetMiles=plannedMinutes/60*profile.planning_mph;
+ if(missedMinutes>0)reasons.push(coachTime(missedMinutes)+' of earlier allocated time lacks recorded riding or a completed plan. The current goal is reduced instead of moving that time into upcoming workouts.');
  reasons.unshift(`Baseline: ${coachTime(baseline.minutes)}/week from ${baseline.source==='history'?'the previous four complete weeks (including zero-ride weeks)': 'your setup'}.`);
  reasons.push(`Targets fit your ${profile.weekly_minutes/60}-hour weekly budget and ${profile.long_minutes/60}-hour session limit. Distance uses your ${profile.planning_mph} mph planning pace.`);
  const actualRides=rides.filter(r=>new Date(r.started_at)<=now),actual=rideTotals(actualRides,start,end),focus={road:'Practice predictable group riding and controlled pacing with an experienced group.',gravel:'Practice handling on similar surfaces and test your repair/resupply setup.',mtb:'Practice familiar technical skills and controlled line choice on similar terrain.',tt:'Rehearse sustainable, even pacing and a familiar riding position.',crit:'Practice cornering and predictable pack skills in a supervised setting.',sportive:'Practice steady endurance pacing and your familiar food and drink routine.'}[race.race_type]||'Practice the demands of your event on familiar rides.';
@@ -83,15 +91,15 @@ export function buildCoachWeek({profile,races,rides,sessions=[],checkin=null,rec
   let remainingBudget=Math.max(0,(plannedMinutes-actual.minutes)-committedMinutes);
   const remainingAllocation=new Map();
   const priority=[...available].sort((a,b)=>(b===profile.long_day)-(a===profile.long_day)||a-b);
-  for(const day of priority){const date=dateKey(addDays(start,day));if(date<today||actualRides.some(r=>dateKey(r.started_at)===date)||sessions.some(s=>s.session_date===date&&!s.archived)||sessions.some(s=>s.coach_key===`coach:${weekKey}:${date}`))continue;let minutes=Math.floor(Math.min(allocation.get(day)||0,remainingBudget)/5)*5;if(minutes<15)minutes=0;remainingAllocation.set(day,minutes);remainingBudget-=minutes;}
+  for(const day of priority){const date=dateKey(addDays(start,day));if(date<today||actualRides.some(r=>dateKey(r.started_at)===date)||sessions.some(s=>s.session_date===date&&!s.archived)||sessions.some(s=>canonicalCoachKey(s.coach_key)===`coach:${weekKey}:${date}`))continue;let minutes=Math.floor(Math.min(allocation.get(day)||0,remainingBudget)/5)*5;if(minutes<15)minutes=0;remainingAllocation.set(day,minutes);remainingBudget-=minutes;}
   const days=Array.from({length:7},(_,day)=>{
-  const date=dateKey(addDays(start,day)),minutes=remainingAllocation.get(day)||0,raceDay=raceOn(date),recorded=actualRides.some(r=>dateKey(r.started_at)===date),existing=sessions.some(s=>s.session_date===date&&!s.archived),key=`coach:${weekKey}:${date}`,wasAdded=sessions.some(s=>s.coach_key===key),isPast=date<today;
+  const date=dateKey(addDays(start,day)),minutes=remainingAllocation.get(day)||0,raceDay=raceOn(date),recorded=actualRides.some(r=>dateKey(r.started_at)===date),existing=sessions.some(s=>s.session_date===date&&!s.archived),key=`coach:${weekKey}:${date}`,wasAdded=sessions.some(s=>canonicalCoachKey(s.coach_key)===key),isPast=date<today;
   let type=minutes?day===profile.long_day?'endurance':'easy':'rest';
   if(checkin?.recovery==='tired'||(evidence.hardWithin48h&&date<=dateKey(addDays(now,1)))||phase==='Recovery'||phase==='Taper'||phase==='Race week')type=minutes?'easy':'rest';
   const kind=raceDay?'race':recorded?'recorded':existing||wasAdded?'existing':isPast?'past':minutes?'suggestion':'rest';
-  return {date,kind,title:raceDay?'Race day':kind==='recorded'?'Recorded riding counts toward your target':kind==='existing'?'Keep your existing calendar entry':kind==='past'?'No extra session added for a missed day':minutes?(type==='endurance'?'Steady endurance ride':'Easy consistency ride'):'Rest / free day',session_type:type,duration_min:minutes||null,distance_m:minutes?Math.round(metersFromMiles(minutes/60*profile.planning_mph)*100)/100:null,coach_key:key,notes:`Coach draft · ${phase}. ${minutes?(type==='endurance'?'Intensity: comfortable endurance, power Z2 or conversational effort. HR responds differently; use your own zones and perceived effort. ':'Intensity: easy, power Z1–2 or comfortable conversation. ')+ 'Keep the planned session size; missed rides do not need to be made up. '+focus:'Use this as a day away from scheduled riding.'}`,status:'planned'};
+  return {date,kind,title:raceDay?'Race day':kind==='recorded'?'Recorded riding counts toward your target':kind==='existing'?'Keep your existing calendar entry':kind==='past'?'No extra session added for a missed day':minutes?(type==='endurance'?'Steady endurance ride':'Easy consistency ride'):'Rest / free day',session_type:type,duration_min:minutes||null,distance_m:minutes?Math.round(metersFromMiles(minutes/60*profile.planning_mph)*100)/100:null,coach_key:key,notes:`Adaptive coach draft · ${phase}. ${minutes?(type==='endurance'?'Intensity: comfortable endurance, power Z2 or conversational effort. HR responds differently; use your own zones and perceived effort. ':'Intensity: easy, power Z1–2 or comfortable conversation. ')+ 'Keep the planned session size; missed rides do not need to be made up. '+focus:'Use this as a day away from scheduled riding.'}`,status:'planned'};
  });
  const stageDays=dayNumber(raceEnd)-dayNumber(raceStart)+1;
- return {state:'ready',evidence,consistency:{daysTarget:[...allocation.values()].filter(n=>n>0).length,daysActual:new Set(actualRides.filter(r=>new Date(r.started_at)>=start&&new Date(r.started_at)<end).map(r=>dateKey(r.started_at))).size,activeWeeks:baseline.activeWeeks},race,start,end,weekKey,phase,baseline,targetMiles,targetMinutes:plannedMinutes,rangeLow:targetMiles*.9,rangeHigh:Math.min(targetMiles*1.05,profile.weekly_minutes/60*profile.planning_mph,available.length*cap/60*profile.planning_mph),actual,days,reasons,focus,stageDays,averageStageMiles:race.distance_m?miles(race.distance_m)/stageDays:null,remainingMiles:Math.max(0,targetMiles-miles(actual.distance)),reviewCalendar:committedMinutes>Math.max(0,Math.min(plannedMinutes-actual.minutes,(targetMiles-miles(actual.distance))/profile.planning_mph*60)),suggestions:days.filter(d=>d.kind==='suggestion'||d.kind==='rest')};
+ return {state:'ready',adjustment:{...adjustment,nominalMinutes,missedMinutes},evidence,consistency:{daysTarget:[...allocation.values()].filter(n=>n>0).length,daysActual:new Set(actualRides.filter(r=>new Date(r.started_at)>=start&&new Date(r.started_at)<end).map(r=>dateKey(r.started_at))).size,activeWeeks:baseline.activeWeeks},race,start,end,weekKey,phase,baseline,targetMiles,targetMinutes:plannedMinutes,rangeLow:targetMiles*.9,rangeHigh:Math.min(targetMiles*1.05,profile.weekly_minutes/60*profile.planning_mph,available.length*cap/60*profile.planning_mph),actual,days,reasons,focus,stageDays,averageStageMiles:race.distance_m?miles(race.distance_m)/stageDays:null,remainingMiles:Math.max(0,targetMiles-miles(actual.distance)),reviewCalendar:committedMinutes>Math.max(0,Math.min(plannedMinutes-actual.minutes,(targetMiles-miles(actual.distance))/profile.planning_mph*60)),suggestions:days.filter(d=>d.kind==='suggestion'||d.kind==='rest')};
 }
 

@@ -28,6 +28,9 @@
   "functions": {
     "api/strava/*.mjs": {
       "maxDuration": 60
+    },
+    "api/calendar/*.mjs": {
+      "maxDuration": 30
     }
   }
 }
