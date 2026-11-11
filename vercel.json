@@ -41,6 +41,9 @@
     },
     "api/calendar/*.mjs": {
       "maxDuration": 30
+    },
+    "api/wahoo/*.mjs": {
+      "maxDuration": 60
     }
   }
 }
