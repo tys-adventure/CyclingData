@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import {createCallback,createStart,createSync,createDisconnect,defaults} from '../lib/wahoo-routes.mjs';
 import {recording,tokenFields,hasScopes,access,acquire} from '../lib/wahoo.mjs';
 import {sameRecording} from '../public/duplicates.js';
+import {wahooImportMessage} from '../public/wahoo-ui.js';
 const state='a'.repeat(64),owner='00000000-0000-0000-0000-000000000001';
 const workout={id:42,starts:'2026-11-11T12:00:00Z',workout_type_id:15,name:'Morning ride',workout_summary:{name:'Coffee ride',distance_accum:'30000.25',duration_active_accum:'3600.0',duration_total_accum:'3900',ascent_accum:'200',power_avg:'170.2',heart_rate_avg:'130',speed_avg:'8.2'}};
 const token={access_token:'test-access',refresh_token:'test-refresh',expires_in:7200,scope:'user_read workouts_read'};
@@ -51,6 +52,16 @@ test('sync pages history, preserves source IDs, saves summaries for owned return
 });
 test('lease acquisition atomically blocks concurrent imports and enforces the cooldown',async()=>{
  await assert.rejects(()=>acquire(owner,{cooldown:true,save:async(p,o)=>{assert.ok(p.includes('busy_until.lt.'));assert.ok(p.includes('last_import_attempt.lt.'));assert.ok(o.body.operation_id);return [];}}),e=>e.status===429);
+});
+test('cycling list entries without summaries are hydrated before eligibility is decided',async()=>{
+ const c={user_id:owner},calls=[];
+ const list=[{...workout,workout_summary:null},{...workout,id:99,workout_summary:null}];
+ const d={...defaults,identify:async()=>owner,connection:async()=>c,acquire:async()=>c,access:async()=>token.access_token,release:async()=>{},wahoo:async path=>{calls.push(path);return path.startsWith('workouts?')?{workouts:list,total:2}:path==='workouts/42'?workout:list[1];},db:async(p,o)=>p.startsWith('rides?')?[{...o.body[0],id:'saved'}]:[c]};
+ const res=response();await createSync(d)({method:'POST',query:{}},res);assert.equal(res.data.imported,1);assert.equal(res.data.skipped.incomplete,1);assert.ok(calls.includes('workouts/42'));assert.ok(calls.includes('workouts/99'));
+ assert.ok(wahooImportMessage(res.data).includes('1 without completed results'));
+ assert.ok(!wahooImportMessage({imported:0,examined:27,skipped:{invalid_duration:27}}).includes('No completed cycling workouts'));
+ assert.ok(wahooImportMessage({imported:0,examined:27,skipped:{invalid_duration:27}}).includes('27 with missing or invalid ride fields'));
+ await assert.rejects(()=>createSync({...d,wahoo:async path=>path.startsWith('workouts?')?{workouts:list,total:2}:{...workout,id:100}})({method:'POST',query:{}},response()),/unexpected workout/);
 });
 test('disconnect revokes the provider and deletes only its connection, retaining rides',async()=>{
  const calls=[];let released=false;const c={user_id:owner};const d={...defaults,identify:async()=>owner,connection:async()=>c,acquire:async()=>c,access:async()=>token.access_token,wahoo:async(p,o,opts)=>{assert.equal(p,'permissions');assert.equal(opts.method,'DELETE');calls.push('revoke');},db:async(p,o)=>{calls.push(p);assert.equal(o.method,'DELETE');},release:async()=>{released=true;}};

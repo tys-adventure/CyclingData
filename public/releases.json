@@ -15,12 +15,17 @@
       {
         "type": "improved",
         "title": "Make room for your history",
-        "text": "Import up to 150 workouts per request, then continue with Import older rides. Reimports update the same source recording; matching Strava and file recordings count once. Wahoo does not return workouts originating in third-party apps."
+        "text": "Import up to 30 workouts per request, then continue with Import older rides. Reimports update the same source recording; matching Strava and file recordings count once. Wahoo does not return workouts originating in third-party apps."
       },
       {
         "type": "improved",
         "title": "Your files still come along",
         "text": "Upload original FIT files for route maps and sensor graphs, or for history unavailable through Wahoo. Wahoo imports run when you press Import; background syncing is not enabled. Disconnect revokes Wahoo access and retains previously imported rides, which you can remove individually."
+      },
+      {
+        "type": "improved",
+        "title": "A clearer import result",
+        "text": "Wahoo imports check individual cycling workouts when the list omits completed results. Import messages distinguish entries without completed results, non-cycling workouts, and missing ride fields."
       }
     ]
   },
