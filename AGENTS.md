@@ -4,7 +4,7 @@
 
 When adding or changing a user-facing feature, behavior, fix, integration, or product UI, update the public release notes in the same change. This is a standing user requirement.
 
-1. Add a dated entry to `public/releases.json`, newest first, or extend the newest entry when continuing the same release. Keep existing release IDs stable because readers can link to them.
+1. Add a dated entry to `public/releases.json`, newest first, or extend the newest entry when continuing the same release. Keep existing release IDs stable because readers can link to them. The journal automatically groups entries with the same date into one daily update; extend that day’s overview when needed, and preserve old direct-link aliases.
 2. Describe the concrete rider-facing behavior. Use `new`, `improved`, or `fixed` for each change. Include relevant limits or availability. Never describe a pending provider approval, unbuilt companion, or development-only feature as shipped.
 3. Use the user's America/New_York calendar date for publication. Don't invent semantic versions or retrospective dates. The existing history is based on verified repository commits.
 4. Run `node scripts/build-releases.mjs` and include the generated `public/releases.html`.

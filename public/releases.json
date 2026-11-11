@@ -26,8 +26,22 @@
         "type": "improved",
         "title": "A clearer import result",
         "text": "Wahoo imports check individual cycling workouts when the list omits completed results. Import messages distinguish entries without completed results, non-cycling workouts, and missing ride fields."
+      },
+      {
+        "type": "improved",
+        "title": "One day, one update",
+        "text": "Same-day releases now share a single card. Search, filters, sharing, older direct links, and interactive previews stay available."
+      },
+      {
+        "type": "new",
+        "title": "Take the features for a spin",
+        "text": "Try sample Wahoo imports and duplicate grouping without signing in. Preview your own FIT, GPX, TCX, or CSV files locally in a temporary workspace; nothing is uploaded or saved."
       }
-    ]
+    ],
+    "daily": {
+      "title": "More ways in. More to explore.",
+      "summary": "A direct Wahoo connection, flexible file imports, and a release journal you can take for a spin. All of today’s improvements, together."
+    }
   },
   {
     "id": "release-journal",
@@ -142,7 +156,11 @@
         "title": "A smoother Strava connection",
         "text": "Private-activity permission is optional, connection failures give actionable explanations, and scope parsing accepts comma- or space-separated permissions."
       }
-    ]
+    ],
+    "daily": {
+      "title": "Your next start line starts here.",
+      "summary": "A private home for your riding history, training calendar, race plans, and personal zones. The first miles of RideVector, in one daily update."
+    }
   },
   {
     "id": "the-first-miles",

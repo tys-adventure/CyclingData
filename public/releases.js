@@ -1,4 +1,5 @@
-import {filterReleases} from './release-utils.js';
+import {initPlayground} from './release-playground.js';
+import {filterReleases,groupReleases} from './release-utils.js';
 const $=selector=>document.querySelector(selector),all=selector=>[...document.querySelectorAll(selector)];
 const params=new URLSearchParams(location.search);
 let type=['all','new','improved','fixed'].includes(params.get('type'))?params.get('type'):'all',releases=[],toastTimer;
@@ -13,14 +14,14 @@ function applyFilters(){
  const url=new URL(location.href);query.trim()?url.searchParams.set('q',query.trim()):url.searchParams.delete('q');type==='all'?url.searchParams.delete('type'):url.searchParams.set('type',type);history.replaceState(null,'',url.pathname+url.search+url.hash);
 }
 function openRelease(id){
- const entry=document.getElementById(id);if(!entry?.matches('[data-release-id]'))return;
+ const target=document.getElementById(id),entry=target?.matches('[data-release-id]')?target:target?.closest('[data-release-id]');if(!entry?.matches('[data-release-id]'))return;
  if(entry.hidden){type='all';$('#release-search').value='';applyFilters();}
  entry.querySelector('details').open=true;
  entry.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
  entry.querySelector('h2').focus({preventScroll:true});
 }
 try{
- const response=await fetch('/releases.json');if(!response.ok)throw Error('Release search is unavailable.');releases=await response.json();
+ const response=await fetch('/releases.json');if(!response.ok)throw Error('Release search is unavailable.');releases=groupReleases(await response.json());
  document.body.classList.add('js');
  $('#release-search').value=params.get('q')||'';
  $('#release-search').addEventListener('input',applyFilters);
@@ -33,3 +34,6 @@ try{
 }catch{document.body.classList.remove('js');$('#release-results').textContent='All published updates · newest first';}
 all('[data-demo-grouping]').forEach(toggle=>toggle.addEventListener('change',event=>{const demo=toggle.closest('.release-art');demo.querySelector('[data-demo-distance]').innerHTML=(event.target.checked?'25':'75')+' <span>mi</span>';demo.querySelector('[data-demo-copy-count]').textContent=event.target.checked?'3 copies':'3 entries';}));
 all('[data-recovery]').forEach(button=>button.addEventListener('click',()=>{const tired=button.dataset.recovery==='tired',demo=button.closest('.release-art');demo.querySelectorAll('[data-recovery]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));demo.querySelector('[data-demo-thursday]').textContent=tired?'45′':'60′';demo.querySelector('[data-demo-saturday]').textContent=tired?'75′':'90′';demo.querySelector('[data-demo-recovery-note]').textContent=tired?'A gentler example week. This illustration is not a training recommendation.':'A sample week, with space to ride and recover.';}));
+
+all('[data-demo-picker]').forEach(select=>select.addEventListener('change',()=>{select.closest('.release-previews').querySelectorAll('[data-demo-panel]').forEach(panel=>{panel.hidden=panel.dataset.demoPanel!==select.value;});}));
+initPlayground();
