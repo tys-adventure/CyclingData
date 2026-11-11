@@ -2,6 +2,12 @@
 
 A private cycling dashboard deployed to https://ridevector.app through the existing Vercel project. Supabase provides email/password authentication and user-owned ride records.
 
+## Release journal
+
+The public release notes live at https://ridevector.app/releases and are linked from the dashboard. They share the app's light/dark theme and include an illustrated timeline, searchable/filterable updates, expandable details, direct links, and interactive examples using sample data. Pending integrations are explicitly separated from shipped releases.
+
+Every product update must include an addition or revision to the newest entry in `public/releases.json`. Follow `AGENTS.md` and `docs/release-process.md`, then regenerate `public/releases.html` with `node scripts/build-releases.mjs`. The Vercel build generates and validates the journal. The release-notes CI workflow checks that product changes also update the latest release entry. This workflow does not alter repository branch-protection rules.
+
 ## Features
 
 - Responsive dashboard with a clearly labeled demo before sign-in, weekly distance, elevation gain, riding time, and ride count.

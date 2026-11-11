@@ -1,0 +1,22 @@
+# Keeping RideVector's journal current
+
+Every product feature, behavior change, fix and UI update includes release notes in the same change. The canonical content is `public/releases.json`; `public/releases.html` is generated and stays readable without JavaScript. Build with `node scripts/build-releases.mjs`. The existing Vercel build runs the generator and validates the content before publishing.
+
+Each entry has a stable URL-safe `id`, an actual `YYYY-MM-DD` publication date, `title`, `summary`, `area`, `visual`, and one or more `changes`. Each change has `type` (`new`, `improved`, `fixed`), `title`, and `text`. Supported visuals are `journal`, `imports`, `calendar`, `zones`, and `foundations`. Add another renderer if a future release needs a different visual. Do not shoehorn unrelated features into an inaccurate demonstration.
+
+Write about what a rider can do now and any meaningful limitations. Pending integrations and development projects belong in the separately labeled workshop section in `lib/release-notes.mjs`. Remove or revise that pending description when the feature ships. Keep existing entry IDs stable; `/releases#bring-your-rides`, for example, is a permanent direct link. No unverified semantic versions or invented usage metrics are used.
+
+For a new publication, prepend an entry. When iterating on the same publication, revise the newest entry. Publication dates use America/New_York calendar days. Historical entries were grouped from the actual repository commits and converted to that timezone. The hero is AI-generated editorial imagery; its on-page caption distinguishes it from a documented real ride. Demonstrations use labeled sample data and do not change the rider's account.
+
+Validation:
+
+```
+node scripts/build-releases.mjs
+node scripts/build-releases.mjs --check
+node scripts/check-release-notes.mjs
+node --test tests/release-notes.test.mjs
+```
+
+The release-notes workflow also compares product files with the event's base commit. Runtime changes under `public/`, `api/`, `lib/`, `ios/`, and database migrations, plus package/deployment changes, require a semantic update to the newest release entry. This broad check intentionally errs toward documenting a change; it can't infer user-visible intent from a diff. Documentation-only and test-only changes do not require a new release. Whitespace-only edits to the release JSON do not satisfy the guard.
+
+The workflow is a CI signal; it does not configure branch-protection rules or prevent every possible direct push. Treat a failing release check as unfinished release work. The standing instruction in `AGENTS.md` applies even when a change is made outside CI. This is a contributor workflow, not a scheduled automation.

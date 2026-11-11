@@ -1,8 +1,17 @@
 {
   "framework": null,
-  "buildCommand": null,
+  "buildCommand": "node scripts/build-releases.mjs && node scripts/check-release-notes.mjs",
   "outputDirectory": "public",
-  "rewrites": [{"source":"/privacy","destination":"/privacy.html"}],
+  "rewrites": [
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/releases",
+      "destination": "/releases.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

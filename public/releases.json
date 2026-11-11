@@ -1,0 +1,70 @@
+[
+  {
+    "id": "release-journal",
+    "date": "2026-11-11",
+    "title": "Good things deserve a place to land.",
+    "summary": "Meet the RideVector release journal: a closer look at the little improvements and bigger adventures happening here.",
+    "area": "The experience",
+    "visual": "journal",
+    "changes": [
+      {"type": "new", "title": "Your release journal", "text": "Explore shipped features, improvements, and fixes in one place, with links from the dashboard."},
+      {"type": "improved", "title": "Find your next discovery", "text": "Search updates, filter by change type, expand the details, or copy a direct link to a release. Interactive examples let you explore selected features with sample data."},
+      {"type": "improved", "title": "A living record", "text": "Release notes are now part of RideVector’s update workflow, with a repository check that flags product changes missing a release-note update."}
+    ]
+  },
+  {
+    "id": "bring-your-rides",
+    "date": "2026-11-11",
+    "title": "More ways in. More miles ahead.",
+    "summary": "Your riding history should come along for the journey. Bring your files, skip the Strava requirement, and keep every ride in perspective.",
+    "area": "Imports & connections",
+    "visual": "imports",
+    "changes": [
+      {"type": "new", "title": "FIT files, welcome aboard", "text": "Import recorded cycling sessions with available GPS, heart-rate, and power data. Device timer duration is shown separately from elapsed and moving time."},
+      {"type": "new", "title": "Bring the whole riding story", "text": "Select up to 100 FIT, GPX, TCX, or CSV files in one batch: up to 10 MB per file, 50 MB combined, and 2,000 rides. Individual file failures are reported so you can retry."},
+      {"type": "improved", "title": "One ride, counted once", "text": "Confidently matched recordings from different sources count once while original source copies stay saved. Manual entries and uncertain matches stay separate. Manage the grouping in Connections."},
+      {"type": "improved", "title": "Strava is optional", "text": "Continue without Strava is now prominent in onboarding. A RideVector account, your activity files, or manual ride entry are enough to get started."}
+    ]
+  },
+  {
+    "id": "a-week-that-moves-with-you",
+    "date": "2026-10-26",
+    "title": "A riding week that moves with you.",
+    "summary": "Plans are useful. Plans that leave room for real life are better. Your coach now puts riding time, recent effort, and recovery in the picture.",
+    "area": "Coach & calendar",
+    "visual": "calendar",
+    "changes": [
+      {"type": "new", "title": "Your plans, in Apple Calendar", "text": "Create a private, revocable calendar subscription for saved training sessions and races. It’s a one-way feed; your calendar app controls refresh timing."},
+      {"type": "improved", "title": "Time comes first", "text": "Coach drafts use recent riding minutes, consistency, recovery check-ins, and usable cached power or heart-rate evidence. Distance stays a secondary estimate."},
+      {"type": "improved", "title": "Room for the week you actually had", "text": "Future, unedited adaptive coach sessions can adjust as RideVector refreshes, imports rides, or receives a check-in. Personal edits and completed or past sessions stay protected. Missed riding isn’t turned into catch-up work."},
+      {"type": "fixed", "title": "Clearer coaching context", "text": "Coach wording now distinguishes adaptive sessions from personal plans and handles stale account loads more carefully. Training suggestions remain transparent planning heuristics, not readiness predictions."}
+    ]
+  },
+  {
+    "id": "a-place-for-your-next-start-line",
+    "date": "2026-10-14",
+    "title": "A little structure. A clear next step.",
+    "summary": "From the next easy spin to your next start line, keep your riding plans, race days, and personal progress together.",
+    "area": "Training & races",
+    "visual": "zones",
+    "changes": [
+      {"type": "new", "title": "Make room for your next adventure", "text": "A private training calendar brings recorded rides, planned sessions, rest days, and races into one view. Weekly recaps and personal records put your history in perspective."},
+      {"type": "new", "title": "Your next start line", "text": "Save races, including multi-day events, and create editable weekly coach drafts around your availability and race goals."},
+      {"type": "new", "title": "Power and heart-rate zones", "text": "Save your FTP and heart-rate boundaries, then explore estimated time in zones from available ride recordings. Missing sensor data stays visible as missing."},
+      {"type": "fixed", "title": "A smoother Strava connection", "text": "Private-activity permission is optional, connection failures give actionable explanations, and scope parsing accepts comma- or space-separated permissions."}
+    ]
+  },
+  {
+    "id": "the-first-miles",
+    "date": "2026-10-14",
+    "title": "Every riding story starts somewhere.",
+    "summary": "The first RideVector dashboard: a private home for your rides, the miles you’re putting in, and the adventures still ahead.",
+    "area": "The foundations",
+    "visual": "foundations",
+    "changes": [
+      {"type": "new", "title": "Your rides, your rhythm", "text": "Private accounts, ride uploads, manual entries, and an optional Strava connection bring your cycling history together."},
+      {"type": "new", "title": "A little perspective", "text": "Explore five date ranges, weekly goals, route maps, available sensor graphs, and duration-based Fitness and Fatigue trends. Distances display in miles and elevation in feet."},
+      {"type": "improved", "title": "Comfort in every light", "text": "Responsive layouts and a persistent light/dark theme make the dashboard feel at home on your screen."}
+    ]
+  }
+]
