@@ -6,12 +6,15 @@ A private cycling dashboard deployed to https://ridevector.app through the exist
 
 - Responsive dashboard with a clearly labeled demo before sign-in, weekly distance, elevation gain, riding time, and ride count.
 - Five dashboard ranges: Last week (trailing 7 days), Last month (trailing 30 days), Last 90 days, Last 6 months (calendar months), and Year to Date (January 1 through today), using the browser’s local timezone. Totals, adaptive daily/weekly/monthly charts, and recent rides follow the selected range. The weekly goal always uses the current Monday–Sunday week. Full paginated ride loading prevents totals from being limited to the first 500 records.
-- GPX and TCX imports, CSV batch import (template provided), and manual ride entry. Files are limited to 10 MB; CSV files to 1,000 rides. Original files are parsed in the browser. Available route coordinates and sensor samples are stored privately with the ride, subject to ownership-based RLS. GPX duration is elapsed track time; TCX uses lap time. Elevation uses a 3-meter noise threshold, so results can differ from device software.
+- FIT, GPX and TCX imports, CSV import (template provided), and manual ride entry. Batch upload accepts up to 100 files, 10 MB each, 50 MB combined and 2,000 rides; each CSV supports up to 1,000 rides. Original files are parsed in the browser. Available route coordinates and sensor samples are stored privately with the ride, subject to ownership-based RLS. FIT accepts recorded cycling sessions and uses device timer duration; GPX duration is elapsed track time; TCX uses lap time. GPS-derived elevation uses a 3-meter noise threshold, so results can differ from device software.
 - SHA-256 file identity prevents repeated uploads of identical files.
+- Confidently matched source recordings count once in the dashboard, calendar, coach and records. Source rows remain intact so a disconnect does not remove independently uploaded history. Manual rides and uncertain matches remain separate. Connections provides a switch to count and manage every source copy separately.
 - Supabase sign-up, email confirmation, sign-in, sign-out, and password reset.
 - Strava authorization with expiring single-use state bound to an HttpOnly browser cookie, server-only tokens, refresh, import covering Year to Date and the last six months (up to 500 activities per import), activity webhooks, and disconnect with data removal. Imports are throttled to once per minute.
 
 ## Browser configuration
+
+Strava is optional. The demo and account-creation flow prominently offer Continue without Strava; file uploads and manual entry work with a RideVector account alone.
 
 In Vercel → cyclingdata → Environment Variables, add `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` from the Strava API application. Select Production and keep them secret. The Supabase integration supplies `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SECRET_KEY` (legacy service-role key is a fallback). Secrets must never use a public prefix.
 
@@ -30,6 +33,16 @@ Push changes to `main`; the existing GitHub-connected Vercel project deploys the
 ## Validation
 
 Run the ride and range tests in `tests/` for metrics, CSV, range boundaries, chart totals, leap years, and year rollover. Browser QA checks the real dashboard and GPX/TCX parsing. Database isolation checks ran inside a rollback transaction, including cross-user insert rejection, anonymous restrictions, and lack of client access to Strava tokens. Strava imports need real app credentials and athlete authorization to test end to end.
+
+Run `node --test tests/*.test.mjs` for the complete JavaScript suite. `tests/imports.test.mjs` covers a synthetic reference-encoded FIT file, sensor/GPS data, corruption rejection, batch limits and partial failures, binary file identity, cross-source matching, owner separation and preservation of uploaded copies. `tests/additional-sources.sql` verifies the new source policies using synthetic users and rolls back its test data.
+
+### Provider expansion and iPhone companion
+
+The `additional_ride_sources` migration allows FIT and Apple Health imports while reserving Garmin/Wahoo identities for server writes. Apply it before deploying the updated importer. The current snapshot has no working Garmin/Wahoo connector or connector credentials; neither provider has approved production access yet. See `docs/provider-integrations.md` for the application status and implementation prerequisites.
+
+`ios/RideVector.xcodeproj` contains a foreground iPhone HealthKit companion. It imports the last 90 days of cycling workouts and available route/HR/power samples into the signed-in RideVector account. It uses read-only Health access, workout UUIDs for idempotency, and an account-bound web bridge without exporting access tokens. See `ios/README.md` for signing, build and device-validation requirements. It is development source, not a compiled or distributed App Store app.
+
+The browser FIT parser is a pinned, locally vendored MIT-licensed `fit-file-parser` 6.2.7 bundle; provenance and licenses are in `public/vendor/fit-file-parser-6.2.7`. Its lazy import does not add a CDN request or send activity files to a third-party parser.
 
 ## Ride recordings and imperial units
 

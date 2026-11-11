@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {parseFIT,ridesFromFITMessages} from '../public/fit.js';
+import {readRideFiles} from '../public/imports.js';
+import {sameRecording,uniqueRecordings} from '../public/duplicates.js';
+const start=new Date('2026-11-01T10:00:00Z'),end=new Date(+start+3600000);
+// Synthetic recording encoded by Garmin's reference SDK, with no real rider data.
+const bytes=fs.readFileSync(new URL('./fixtures/qa-sensors.fit',import.meta.url)),buffer=bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
+const [fit]=parseFIT(buffer,'Sunday.fit');
+assert.equal(fit.distance_m,25000);assert.equal(fit.duration_s,3500);assert.equal(fit.elevation_m,220);
+assert.equal(fit._details.summary.elapsed_s,3600);assert.equal(fit._details.summary.moving_s,null);
+assert.equal(fit._details.streams.watts[0],0);assert.equal(fit._details.streams.heartrate[1],160);
+assert.ok(Math.abs(fit._details.streams.latlng[1][0]-.1)<.001);
+const corrupt=buffer.slice(0);new Uint8Array(corrupt)[25]^=255;assert.throws(()=>parseFIT(corrupt,'bad.fit'),/damaged/);
+assert.throws(()=>parseFIT(new ArrayBuffer(4),'bad.fit'));
+assert.throws(()=>ridesFromFITMessages({fileIdMesgs:[{type:'workout'}]}),/activity/);
+assert.throws(()=>ridesFromFITMessages({fileIdMesgs:[{type:'activity'}],sessionMesgs:[{sport:'running'}]}),/cycling/);
+const file=(name,data)=>({name,size:data.byteLength,arrayBuffer:async()=>data});
+const csv=new TextEncoder().encode('name,date,distance_miles,elevation_ft,duration_minutes\nTest,2026-11-01T10:00:00Z,15,100,60').buffer;
+const batch=await readRideFiles([file('Sunday.fit',buffer),file('history.csv',csv),file('bad.fit',corrupt)]);
+assert.equal(batch.items.length,2);assert.equal(batch.failures.length,1);assert.equal(batch.failures[0].name,'bad.fit');
+const repeat=await readRideFiles([file('renamed.fit',buffer)]);assert.equal(batch.items[0].source_id,repeat.items[0].source_id);
+await assert.rejects(()=>readRideFiles(Array(101).fill(file('a.fit',buffer))),/100 files/);
+await assert.rejects(()=>readRideFiles([{size:51*1024*1024}]),/50 MB/);
+const base={...fit,user_id:'a',id:'file',source_id:'fit-id'},strava={...base,id:'strava',source:'strava',source_id:'remote',distance_m:25100,started_at:new Date(+start+10000).toISOString()};
+assert.equal(sameRecording(base,strava),true);assert.equal(uniqueRecordings([strava,base]).length,1);
+assert.equal(uniqueRecordings([strava,base])[0].id,'file');assert.equal(uniqueRecordings([strava,base])[0]._copies.length,2);
+assert.equal(sameRecording(base,{...strava,user_id:'b'}),false);
+assert.equal(sameRecording(base,{...strava,source:'manual'}),false);
+assert.equal(sameRecording(base,{...strava,started_at:new Date(+start+31000).toISOString()}),false);
+assert.equal(sameRecording(base,{...strava,distance_m:35000}),false);
+assert.equal(sameRecording(base,{...strava,duration_s:2500}),false);
+assert.equal(sameRecording({...base,distance_m:0},{...strava,distance_m:0}),false);
+assert.equal(uniqueRecordings([base,strava,{...strava,id:'third',started_at:new Date(+start+40000).toISOString()}]).length,2);
+// Removing a provider copy does not remove the user's uploaded recording.
+assert.equal(uniqueRecordings([base])[0].id,'file');
+console.log('Real FIT encoding/decoding, corruption, cycling filtering, batch failures/limits, binary identity, duplicate matching and source preservation passed.');
