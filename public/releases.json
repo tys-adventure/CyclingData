@@ -55,7 +55,7 @@
       {
         "type": "improved",
         "title": "Updates at your pace",
-        "text": "A new build offers Reload & update instead of automatically refreshing your workspace. Open dialogs and active ride imports block that reload until you finish. Apple Health remains part of the separate native companion in development."
+        "text": "A new build offers Reload & update instead of automatically refreshing your workspace. Open dialogs and active ride imports block that reload until you finish. Apple Health remains part of the separate native companion in development. Each build refreshes the public offline cache."
       }
     ],
     "daily": {
