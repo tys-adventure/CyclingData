@@ -8,8 +8,9 @@ When adding or changing a user-facing feature, behavior, fix, integration, or pr
 2. Describe the concrete rider-facing behavior. Use `new`, `improved`, or `fixed` for each change. Include relevant limits or availability. Never describe a pending provider approval, unbuilt companion, or development-only feature as shipped.
 3. Use the user's America/New_York calendar date for publication. Don't invent semantic versions or retrospective dates. The existing history is based on verified repository commits.
 4. Run `node scripts/build-releases.mjs` and include the generated `public/releases.html`.
-5. Run `node scripts/check-release-notes.mjs` and the appropriate tests. Where Git history is available, also run `node scripts/check-release-notes.mjs --base <base-sha> --head HEAD`.
-6. Keep links from the dashboard to `/releases` working, and preserve light/dark themes, keyboard navigation, mobile layouts and reduced-motion behavior.
+5. Run `node scripts/build-pwa.mjs` after generating release notes and include `public/sw.js`; verify with `node scripts/build-pwa.mjs --check`. The worker version changes with public assets, and only the explicit public offline allowlist may be cached. Keep account/API responses out of it.
+6. Run `node scripts/check-release-notes.mjs` and the appropriate tests. Where Git history is available, also run `node scripts/check-release-notes.mjs --base <base-sha> --head HEAD`.
+7. Keep links from the dashboard to `/releases` working, and preserve light/dark themes, keyboard navigation, mobile layouts and reduced-motion behavior.
 
 The build generates a static readable journal; JavaScript adds search, filters, direct-link sharing and illustrative demos. Follow `docs/release-process.md` for the content schema and checks. Update the workshop section if a previously pending feature actually ships.
 

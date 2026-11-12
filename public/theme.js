@@ -19,7 +19,7 @@
   apply();
   document.addEventListener('DOMContentLoaded', () => {
     apply();
-    document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
       preference = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
       try { localStorage.setItem(key, preference); } catch {}
       apply();
@@ -32,3 +32,4 @@
     apply();
   });
 })();
+

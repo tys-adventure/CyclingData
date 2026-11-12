@@ -13,6 +13,8 @@ Validation:
 ```
 node scripts/build-releases.mjs
 node scripts/build-releases.mjs --check
+node scripts/build-pwa.mjs
+node scripts/build-pwa.mjs --check
 node scripts/check-release-notes.mjs
 node --test tests/release-notes.test.mjs
 ```
@@ -22,3 +24,5 @@ The release-notes workflow also compares product files with the event's base com
 The workflow is a CI signal; it does not configure branch-protection rules or prevent every possible direct push. Treat a failing release check as unfinished release work. The standing instruction in `AGENTS.md` applies even when a change is made outside CI. This is a contributor workflow, not a scheduled automation.
 
 The sign-in-free playground uses the shared file parser and duplicate projection with temporary in-memory records. Sample Wahoo actions do not contact Wahoo or authorize an account. Local FIT/GPX/TCX/CSV previews never save to Supabase, draw external map tiles, or upload original files. Leaving the page or resetting the demo clears imported preview records. Keep this boundary when adding demonstrations; real provider authorization belongs in the signed-in dashboard.
+
+The installable web app worker is generated after release HTML. Include `public/sw.js` whenever public assets change, even if only the notes changed; its content version offers users a controlled update. New offline assets must be explicitly added to the public allowlist and tested. Do not add dashboard HTML, authentication, private records, provider responses, or mutation queues to that cache. See `docs/installable-web-app.md`.

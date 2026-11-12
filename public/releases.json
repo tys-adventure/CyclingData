@@ -36,11 +36,31 @@
         "type": "new",
         "title": "Take the features for a spin",
         "text": "Try sample Wahoo imports and duplicate grouping without signing in. Preview your own FIT, GPX, TCX, or CSV files locally in a temporary workspace; nothing is uploaded or saved."
+      },
+      {
+        "type": "new",
+        "title": "RideVector on your Home Screen",
+        "text": "Install the web app from Safari on iPhone with RideVector icons and its own app window. The new installation guide walks through setup; browsers that support a native install prompt can use it too."
+      },
+      {
+        "type": "improved",
+        "title": "Made for a phone in your hand",
+        "text": "Bottom navigation, a More menu, larger form controls, and safe-area spacing bring the dashboard closer to a phone app. Your current section survives a reload, and provider callbacks return to Connections."
+      },
+      {
+        "type": "new",
+        "title": "A clearer connection to the road",
+        "text": "Public guides, release notes, and their playground can load from the offline cache after setup. Private dashboard data, authenticated responses, and provider APIs are never cached by the service worker. Sign-in, saving, and imports need a connection."
+      },
+      {
+        "type": "improved",
+        "title": "Updates at your pace",
+        "text": "A new build offers Reload & update instead of automatically refreshing your workspace. Open dialogs and active ride imports block that reload until you finish. Apple Health remains part of the separate native companion in development."
       }
     ],
     "daily": {
-      "title": "More ways in. More to explore.",
-      "summary": "A direct Wahoo connection, flexible file imports, and a release journal you can take for a spin. All of today’s improvements, together."
+      "title": "Your riding life, a little closer.",
+      "summary": "An installable phone experience, a direct Wahoo connection, flexible imports, and a release journal you can take for a spin. Today’s improvements, together."
     }
   },
   {

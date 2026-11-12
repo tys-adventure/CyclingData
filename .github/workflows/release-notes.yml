@@ -20,7 +20,8 @@ jobs:
         run: |
           node scripts/build-releases.mjs --check
           node scripts/check-release-notes.mjs
-          node --test tests/release-notes.test.mjs
+          node scripts/build-pwa.mjs --check
+          node --test tests/release-notes.test.mjs tests/pwa.test.mjs
       - name: Require notes for product changes
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}

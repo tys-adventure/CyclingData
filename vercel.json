@@ -1,6 +1,6 @@
 {
   "framework": null,
-  "buildCommand": "node scripts/build-releases.mjs && node scripts/check-release-notes.mjs",
+  "buildCommand": "node scripts/build-releases.mjs && node scripts/check-release-notes.mjs && node scripts/build-pwa.mjs",
   "outputDirectory": "public",
   "rewrites": [
     {
@@ -10,6 +10,10 @@
     {
       "source": "/releases",
       "destination": "/releases.html"
+    },
+    {
+      "source": "/install",
+      "destination": "/install.html"
     }
   ],
   "headers": [
@@ -31,6 +35,32 @@
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://tile.openstreetmap.org https://cdn.jsdelivr.net; connect-src 'self' https://tmqkxgrybawqoxvykonp.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
         }
       ]
     }
