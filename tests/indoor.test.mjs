@@ -62,7 +62,7 @@ test('dashboard time formatting and indoor breakdown use the requested dates and
  const outdoor={...base,indoor:false,distance_m:10000,duration_s:3600},rides=[base,outdoor,{...base,started_at:'2026-11-12T10:00:00Z',duration_s:600}];
  const time=ridingTimeBreakdown(rides,{start:new Date('2026-11-13T00:00:00Z'),end:new Date('2026-11-14T00:00:00Z')});
  assert.equal(time.totalSeconds,6300);assert.equal(time.total,'1 hr 45 min');assert.equal(time.text,'Indoor 45 min · Outdoor 1 hr');assert.equal(time.indoorCount,1);
- const future=ridingTimeBreakdown(rides,{start:new Date('2026-11-13T00:00:00Z'),now:new Date('2026-11-13T09:00:00Z')});assert.equal(future.totalSeconds,0);
+ const future=ridingTimeBreakdown(rides,{start:new Date('2026-11-13T00:00:00Z'),now:new Date('2026-11-13T09:00:00Z')});assert.equal(future.totalSeconds,0);const rounded=ridingTimeBreakdown([{...base,duration_s:2234},{...outdoor,duration_s:3863}]);assert.equal(rounded.totalMinutes,102);assert.equal(rounded.indoorMinutes+rounded.outdoorMinutes,102);assert.equal(rounded.totalSeconds,6097);
 });
 test('indoor time reduces remaining coach volume and can meet its whole target without mileage',async()=>{
  const {buildCoachWeek}=await import('../public/coach.js');

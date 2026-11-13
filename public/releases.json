@@ -39,7 +39,7 @@
       {
         "type": "improved",
         "title": "See every indoor minute",
-        "text": "Time in the saddle and weekly recaps now show hours and minutes instead of decimal hours. Indoor/outdoor breakdowns appear on the dashboard, in weekly recaps, and in the race coach. The coach explains how indoor time counts and distinguishes its Monday–Sunday week from the selected dashboard range."
+        "text": "Time in the saddle and weekly recaps now show hours and minutes instead of decimal hours. Indoor/outdoor breakdowns appear on the dashboard, in weekly recaps, and in the race coach. The coach explains how indoor time counts and distinguishes its Monday–Sunday week from the selected dashboard range. Whole-minute breakdowns add up to the displayed total; training calculations keep the original recorded seconds."
       }
     ]
   },

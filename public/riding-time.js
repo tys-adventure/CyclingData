@@ -10,8 +10,8 @@ export function ridingTimeBreakdown(rides,{start=null,end=null,now=null}={}){
   if(!Number.isFinite(at)||!Number.isFinite(seconds)||seconds<0||(start&&at<+start)||(end&&at>=+end)||(now&&at>+now))continue;
   if(ride.indoor===true){indoorSeconds+=seconds;indoorCount++;}else{outdoorSeconds+=seconds;outdoorCount++;}
  }
- const totalSeconds=indoorSeconds+outdoorSeconds;
- return {indoorSeconds,outdoorSeconds,totalSeconds,indoorCount,outdoorCount,
+ const totalSeconds=indoorSeconds+outdoorSeconds,totalMinutes=Math.round(totalSeconds/60),indoorMinutes=Math.round(indoorSeconds/60),outdoorMinutes=totalMinutes-indoorMinutes;
+ return {indoorSeconds,outdoorSeconds,totalSeconds,indoorCount,outdoorCount,totalMinutes,indoorMinutes,outdoorMinutes,
   total:formatRidingTime(totalSeconds),
-  text:'Indoor '+formatRidingTime(indoorSeconds)+' · Outdoor '+formatRidingTime(outdoorSeconds)};
+  text:'Indoor '+formatRidingTime(indoorMinutes*60)+' · Outdoor '+formatRidingTime(outdoorMinutes*60)};
 }
