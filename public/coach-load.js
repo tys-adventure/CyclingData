@@ -1,9 +1,7 @@
+import {formatRidingTime} from './riding-time.js';
 import {timeInZones} from './zones.js';
 import {dateKey,addDays} from './planner.js';
-export function coachTime(minutes){
- const total=Math.max(0,Math.round(Number(minutes)||0)),h=Math.floor(total/60),m=total%60;
- return h?(h+' hr'+(h===1?'':'s')+(m?' '+m+' min':'')):total+' min';
-}
+export const coachTime=minutes=>formatRidingTime(Number(minutes)*60);
 export function coachEvidence({rides=[],recordings={},zones=null,now=new Date(),baselineMinutes=0}){
  const recent=rides.filter(r=>new Date(r.started_at)<=now&&new Date(r.started_at)>=addDays(now,-7));
  let coveredMinutes=0,highMinutes=0,powerRides=0,hrRides=0,lastHardEnd=null;

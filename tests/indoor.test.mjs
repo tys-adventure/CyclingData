@@ -55,3 +55,21 @@ test('indoor details lead with time, escape notes, show cadence, and omit unavai
  assert.match(target.innerHTML,/Ride duration/);assert.match(target.innerHTML,/Not recorded/);assert.match(target.innerHTML,/Average cadence/);assert.match(target.innerHTML,/Class &lt;hard&gt;/);
  for(const absent of ['ride-route-map','speed-chart','distance-chart','Average speed'])assert.ok(!target.innerHTML.includes(absent));
 });
+
+test('dashboard time formatting and indoor breakdown use the requested dates and recorded seconds',async()=>{
+ const {formatRidingTime,ridingTimeBreakdown}=await import('../public/riding-time.js');
+ assert.equal(formatRidingTime(6097),'1 hr 42 min');assert.equal(formatRidingTime(2700),'45 min');assert.equal(formatRidingTime(7200),'2 hrs');
+ const outdoor={...base,indoor:false,distance_m:10000,duration_s:3600},rides=[base,outdoor,{...base,started_at:'2026-11-12T10:00:00Z',duration_s:600}];
+ const time=ridingTimeBreakdown(rides,{start:new Date('2026-11-13T00:00:00Z'),end:new Date('2026-11-14T00:00:00Z')});
+ assert.equal(time.totalSeconds,6300);assert.equal(time.total,'1 hr 45 min');assert.equal(time.text,'Indoor 45 min · Outdoor 1 hr');assert.equal(time.indoorCount,1);
+ const future=ridingTimeBreakdown(rides,{start:new Date('2026-11-13T00:00:00Z'),now:new Date('2026-11-13T09:00:00Z')});assert.equal(future.totalSeconds,0);
+});
+test('indoor time reduces remaining coach volume and can meet its whole target without mileage',async()=>{
+ const {buildCoachWeek}=await import('../public/coach.js');
+ const now=new Date(2026,10,13,12),week=monday(now),profile={experience:'intermediate',available_days:[1,3,5,6],weekly_minutes:360,long_minutes:120,long_day:6,planning_mph:12,baseline_miles:60,target_race_id:'race',started_week:'2026-11-09'},races=[{id:'race',name:'Future race',race_date:'2027-05-14',race_type:'road',goal:'compete'}];
+ const model=rides=>buildCoachWeek({profile,races,rides,week,now});
+ const ride={...base,started_at:new Date(2026,10,13,8).toISOString()},one=model([ride]);
+ assert.equal(one.state,'ready');assert.equal(one.actual.minutes,45);assert.equal(one.actual.distance,0);assert.equal(one.consistency.daysActual,1);assert.equal(one.days.find(d=>d.date==='2026-11-13').kind,'recorded');
+ assert.equal(one.evidence.recentMinutes,45);assert.equal(one.evidence.unknownRides,1);
+ const completed=model([{...ride,duration_s:360*60}]);assert.equal(completed.actual.minutes,360);assert.ok(completed.suggestions.every(d=>d.session_type==='rest'));
+});

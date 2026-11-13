@@ -35,6 +35,11 @@
         "type": "new",
         "title": "Try an indoor spin without signing in",
         "text": "The release playground includes a sample 45-minute indoor ride. Watch riding time and ride count increase while distance stays unchanged. The sample stays in temporary browser memory and does not change your account."
+      },
+      {
+        "type": "improved",
+        "title": "See every indoor minute",
+        "text": "Time in the saddle and weekly recaps now show hours and minutes instead of decimal hours. Indoor/outdoor breakdowns appear on the dashboard, in weekly recaps, and in the race coach. The coach explains how indoor time counts and distinguishes its Monday–Sunday week from the selected dashboard range."
       }
     ]
   },

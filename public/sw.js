@@ -1,5 +1,5 @@
 // Build injects a content-based cache name and a fixed public-asset allowlist.
-const CACHE="ridevector-public-d2bccb9028c9c52a";
+const CACHE="ridevector-public-a0bd63a2424c9cf6";
 const PUBLIC_ASSETS=["/offline.html","/install.html","/privacy.html","/releases.html","/releases.json","/style.css","/pwa.css","/releases.css","/theme.js","/domain.js","/pwa.js","/install-prompt.js","/releases.js","/release-utils.js","/release-playground.js","/imports.js","/rides.js","/fit.js","/telemetry.js","/duplicates.js","/units.js","/vendor/fit-file-parser-6.2.7/parser.js","/icon.svg","/icons/icon-180.png","/icons/icon-192.png","/icons/icon-512.png","/manifest.webmanifest","/sample-rides.csv","/images/release-road.jpg"];
 const publicPaths=new Set(PUBLIC_ASSETS);
 const pageAliases={'/install':'/install.html','/releases':'/releases.html','/privacy':'/privacy.html'};
