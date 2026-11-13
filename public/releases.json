@@ -1,5 +1,30 @@
 [
   {
+    "id": "android-home-screen",
+    "date": "2026-11-13",
+    "title": "A place on your Android Home Screen.",
+    "summary": "Install RideVector from Chrome on Android, with clear setup steps for both Android and iPhone.",
+    "area": "The experience",
+    "visual": "foundations",
+    "changes": [
+      {
+        "type": "new",
+        "title": "Android has a home here",
+        "text": "The installation guide now includes Android Chrome setup, alongside the existing iPhone Safari steps. Launch RideVector from your Home Screen or app launcher in its own window, with no app store download."
+      },
+      {
+        "type": "improved",
+        "title": "A smoother invitation to install",
+        "text": "When the browser offers installation, use Install RideVector directly. The button prevents repeated prompts, handles dismissal and errors, and confirms completed installation. Browser-menu instructions remain available even when no prompt appears."
+      },
+      {
+        "type": "improved",
+        "title": "The same riding workspace",
+        "text": "Android uses the existing phone navigation, themed dashboard, controlled updates, and public offline guides. Sign-in, private rides, saving, and provider imports still need a connection; installation does not add health access or background tracking."
+      }
+    ]
+  },
+  {
     "id": "wahoo-direct",
     "date": "2026-11-11",
     "title": "A direct line to your Wahoo rides.",

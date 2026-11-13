@@ -1,10 +1,7 @@
+import {setupInstallPrompt} from './install-prompt.js';
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-document.documentElement.classList.toggle('installed-app',standalone());
-let installPrompt=null,registration=null,lastUpdateCheck=Date.now();
-window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;document.querySelectorAll('[data-native-install]').forEach(button=>button.hidden=false);});
-document.querySelectorAll('[data-native-install]').forEach(button=>button.addEventListener('click',async()=>{if(!installPrompt)return;await installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;button.hidden=true;}));
-window.addEventListener('appinstalled',()=>{installPrompt=null;document.documentElement.classList.add('installed-app');document.querySelectorAll('[data-native-install]').forEach(button=>button.hidden=true);});
-if(standalone())document.querySelectorAll('[data-installed-status]').forEach(node=>{node.hidden=false;});
+setupInstallPrompt(window,document,standalone());
+let registration=null,lastUpdateCheck=Date.now();
 document.querySelectorAll('[data-retry-connection]').forEach(button=>button.addEventListener('click',()=>location.reload()));
 
 const offline=document.createElement('div');offline.className='connection-state';offline.role='status';offline.setAttribute('aria-live','polite');offline.hidden=navigator.onLine;

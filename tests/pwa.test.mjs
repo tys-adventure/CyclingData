@@ -40,3 +40,29 @@ test('online navigation stays live and only explicit update messages activate a 
  h.handlers.message({data:{type:'UNKNOWN'}});assert.equal(h.activated(),0);h.handlers.message({data:{type:'ACTIVATE_UPDATE'}});assert.equal(h.activated(),1);
  let activating;h.handlers.activate({waitUntil:value=>activating=value});await activating;assert.deepEqual(h.removed,['ridevector-public-old']);
 });
+
+function installHarness(standalone=false){
+ const events={},clicks=[],buttons=[{hidden:true,addEventListener:(_,fn)=>clicks.push(fn)},{hidden:true,addEventListener:(_,fn)=>clicks.push(fn)}],status={textContent:''},installedStatus={hidden:true},classes=new Set();
+ const document={querySelectorAll:selector=>selector==='[data-native-install]'?buttons:selector==='[data-install-status]'?[status]:[installedStatus],documentElement:{classList:{toggle:(name,value)=>value?classes.add(name):classes.delete(name)}}};
+ const window={addEventListener:(name,fn)=>events[name]=fn};
+ const source=fs.readFileSync(new URL('install-prompt.js',root),'utf8').replace('export function','function');
+ vm.runInNewContext(source+'\nsetupInstallPrompt(window,document,standalone);',{window,document,standalone});
+ function offer({outcome='dismissed',error=false,choice}={}){let calls=0,prevented=false;events.beforeinstallprompt({preventDefault:()=>prevented=true,prompt:async()=>{calls++;if(error)throw Error('Browser rejected prompt');},userChoice:choice||Promise.resolve({outcome})});return {calls:()=>calls,prevented:()=>prevented};}
+ return {events,clicks,buttons,status,installedStatus,classes,offer};
+}
+test('install eligibility and dismissal keep manual setup available; events cannot be reused',async()=>{
+ const h=installHarness();assert.ok(h.buttons.every(b=>b.hidden));await h.clicks[0]();
+ const event=h.offer();assert.equal(event.prevented(),true);assert.ok(h.buttons.every(b=>!b.hidden));
+ await h.clicks[0]();await h.clicks[1]();assert.equal(event.calls(),1);assert.ok(h.buttons.every(b=>b.hidden&&!b.disabled));assert.match(h.status.textContent,/browser menu/);
+ const fresh=h.offer({outcome:'accepted'});await h.clicks[1]();assert.equal(fresh.calls(),1);assert.equal(h.installedStatus.hidden,true);assert.match(h.status.textContent,/Finish the browser/);
+ h.events.appinstalled();assert.equal(h.installedStatus.hidden,false);assert.ok(h.classes.has('installed-app'));assert.match(h.status.textContent,/is installed/);
+});
+test('an in-flight install blocks double clicks and preserves an early appinstalled event',async()=>{
+ const h=installHarness();let resolve;const choice=new Promise(done=>resolve=done);const event=h.offer({choice});
+ const pending=h.clicks[0]();assert.ok(h.buttons.every(b=>b.disabled));await h.clicks[1]();assert.equal(event.calls(),1);
+ h.events.appinstalled();resolve({outcome:'accepted'});await pending;assert.equal(h.installedStatus.hidden,false);assert.match(h.status.textContent,/is installed/);assert.ok(h.buttons.every(b=>b.hidden&&!b.disabled));
+});
+test('prompt failure recovers with manual guidance and installed windows never offer installation',async()=>{
+ const h=installHarness();h.offer({error:true});await h.clicks[0]();assert.ok(h.buttons.every(b=>b.hidden&&!b.disabled));assert.match(h.status.textContent,/could not open/);
+ const installed=installHarness(true);const event=installed.offer();await installed.clicks[0]();assert.equal(event.calls(),0);assert.equal(installed.installedStatus.hidden,false);assert.ok(installed.buttons.every(b=>b.hidden));
+});
