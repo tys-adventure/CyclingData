@@ -5,7 +5,7 @@
     "title": "A place on your Android Home Screen.",
     "summary": "Install RideVector from Chrome on Android, with clear setup steps for both Android and iPhone.",
     "area": "The experience",
-    "visual": "foundations",
+    "visual": "install",
     "changes": [
       {
         "type": "new",

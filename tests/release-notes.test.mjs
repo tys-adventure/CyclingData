@@ -21,6 +21,7 @@ assert.equal(days.reduce((n,d)=>n+d.changes.length,0),releases.reduce((n,r)=>n+r
 assert.ok(filterReleases(days,'Wahoo').some(d=>d.id==='day-2026-11-11'));
 const multiReleaseDay=days.find(day=>day.id==='day-2026-11-11');
 assert.ok(multiReleaseDay.visuals.includes('imports')&&multiReleaseDay.visuals.includes('journal'));
+assert.ok(html.includes('href="/install#android-steps"'));assert.ok(html.includes('href="/install#iphone-steps"'));
 assert.ok(html.includes('id="playground"'));assert.ok(html.includes('data-demo-picker'));
 const sample=mergePreviewRecords(sampleBaseline(),sampleWahoo());
 assert.equal(sample.length,3);assert.equal(previewStats(sample).rides.length,2);assert.equal(previewStats(sample,false).rides.length,3);

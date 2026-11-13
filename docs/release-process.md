@@ -2,7 +2,7 @@
 
 Every product feature, behavior change, fix and UI update includes release notes in the same change. The canonical content is `public/releases.json`; `public/releases.html` is generated and stays readable without JavaScript. Build with `node scripts/build-releases.mjs`. The existing Vercel build runs the generator and validates the content before publishing.
 
-Each entry has a stable URL-safe `id`, an actual `YYYY-MM-DD` publication date, `title`, `summary`, `area`, `visual`, and one or more `changes`. Each change has `type` (`new`, `improved`, `fixed`), `title`, and `text`. Supported visuals are `journal`, `imports`, `calendar`, `zones`, and `foundations`. Add another renderer if a future release needs a different visual. Do not shoehorn unrelated features into an inaccurate demonstration.
+Each entry has a stable URL-safe `id`, an actual `YYYY-MM-DD` publication date, `title`, `summary`, `area`, `visual`, and one or more `changes`. Each change has `type` (`new`, `improved`, `fixed`), `title`, and `text`. Supported visuals are `journal`, `imports`, `calendar`, `zones`, `foundations`, and `install`. Add another renderer if a future release needs a different visual. Do not shoehorn unrelated features into an inaccurate demonstration.
 
 Write about what a rider can do now and any meaningful limitations. Pending integrations and development projects belong in the separately labeled workshop section in `lib/release-notes.mjs`. Remove or revise that pending description when the feature ships. Keep existing entry IDs stable; `/releases#bring-your-rides`, for example, is a permanent direct link. No unverified semantic versions or invented usage metrics are used.
 
