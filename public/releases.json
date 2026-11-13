@@ -1,5 +1,44 @@
 [
   {
+    "id": "indoor-cycling",
+    "date": "2026-11-13",
+    "title": "No distance? Still a ride.",
+    "summary": "Give indoor cycling a proper place in your riding week, even when your bike records time alone.",
+    "area": "Rides & imports",
+    "visual": "indoor",
+    "daily": {
+      "title": "Every ride counts. Indoors, too.",
+      "summary": "Duration-only indoor rides, clearer provider imports, and a place on your Android Home Screen. Today’s improvements, together."
+    },
+    "changes": [
+      {
+        "type": "new",
+        "title": "Log the minutes that matter",
+        "text": "Choose Indoor cycling when adding a ride. Duration is required; distance and elevation are optional. Add available heart rate, power, cadence averages, and notes. Missing distance stays unknown and is never estimated."
+      },
+      {
+        "type": "improved",
+        "title": "Indoor rides from your favorite tools",
+        "text": "Strava trainer and virtual cycling rides and Wahoo indoor, spin-class, stationary-bike, trainer, and virtual sessions can import without distance. Garmin indoor cycling is supported through exported FIT or TCX files; direct Garmin syncing still awaits provider approval. Reimport older files or run provider imports again to recognize indoor metadata."
+      },
+      {
+        "type": "improved",
+        "title": "Time counts across your workspace",
+        "text": "Indoor sessions contribute to ride counts, riding time, calendar history, duration-based training trends, and time records. Mileage uses recorded distances only. Indoor details lead with duration and available sensors, and omit unavailable maps and distance charts."
+      },
+      {
+        "type": "improved",
+        "title": "Careful matching without mileage",
+        "text": "Time-only duplicate matching requires explicit indoor classification, different sources, sessions of at least five minutes, starts within five seconds, and durations within 1% or five seconds. Manual entries, conflicting groups, and uncertain matches stay separate; original source copies remain available."
+      },
+      {
+        "type": "new",
+        "title": "Try an indoor spin without signing in",
+        "text": "The release playground includes a sample 45-minute indoor ride. Watch riding time and ride count increase while distance stays unchanged. The sample stays in temporary browser memory and does not change your account."
+      }
+    ]
+  },
+  {
     "id": "android-home-screen",
     "date": "2026-11-13",
     "title": "A place on your Android Home Screen.",

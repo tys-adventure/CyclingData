@@ -1,2 +1,3 @@
-name,date,distance_miles,elevation_ft,duration_minutes
-Morning spin,2026-10-14T08:00:00-04:00,15.84,689,75
+name,date,distance_miles,elevation_ft,duration_minutes,indoor
+Morning spin,2026-10-14T08:00:00-04:00,15.84,689,75,false
+Indoor class,2026-11-13T18:00:00-05:00,,,45,true

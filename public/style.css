@@ -57,3 +57,5 @@
 .release-nav-link{display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--muted);font-size:11px;white-space:nowrap}.release-nav-link:hover{color:var(--ink)}.release-nav-link>span{color:var(--ink);font-size:16px}@media(max-width:520px){.release-nav-link{font-size:9px;gap:3px}.topbar>div{gap:7px}}
 
 .wahoo-mark{width:50px;height:50px;flex-shrink:0;border-radius:14px;background:var(--green);color:var(--paper);display:grid;place-items:center;font-size:24px;font-weight:800;font-style:italic}
+
+.ride-notes{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.8;color:var(--muted);margin-top:12px}

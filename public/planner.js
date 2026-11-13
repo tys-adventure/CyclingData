@@ -31,7 +31,7 @@ export function personalRecords(rides,now=new Date()){
  const valid=rides.filter(r=>Number.isFinite(Date.parse(r.started_at))&&new Date(r.started_at)<=now);
  const best=field=>valid.filter(r=>Number(r[field])>0).sort((a,b)=>Number(b[field])-Number(a[field])||Date.parse(a.started_at)-Date.parse(b.started_at)||String(a.id).localeCompare(String(b.id)))[0]||null;
  const weeks=new Map();for(const ride of valid){const key=dateKey(monday(new Date(ride.started_at)));const week=weeks.get(key)||{date:key,distance:0,count:0};week.distance+=Number(ride.distance_m)||0;week.count++;weeks.set(key,week);}
- const bestWeek=[...weeks.values()].sort((a,b)=>b.distance-a.distance||a.date.localeCompare(b.date))[0]||null;
+ const bestWeek=[...weeks.values()].filter(w=>w.distance>0).sort((a,b)=>b.distance-a.distance||a.date.localeCompare(b.date))[0]||null;
  return {distance:best('distance_m'),elevation:best('elevation_m'),duration:best('duration_s'),week:bestWeek};
 }
 export function dayEvents(key,rides,races,sessions,includeArchived=false){
