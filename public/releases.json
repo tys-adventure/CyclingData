@@ -24,7 +24,7 @@
       {
         "type": "improved",
         "title": "Time counts across your workspace",
-        "text": "Indoor sessions contribute to ride counts, riding time, calendar history, duration-based training trends, and time records. Mileage uses recorded distances only. Indoor details lead with duration and available sensors, and omit unavailable maps and distance charts."
+        "text": "Indoor sessions contribute to ride counts, riding time, calendar history, duration-based training trends, and time records. Mileage uses recorded distances only. Indoor details lead with duration and available sensors, and omit unavailable maps and distance charts. Sensor cards and single charts expand to fit the available space."
       },
       {
         "type": "improved",
